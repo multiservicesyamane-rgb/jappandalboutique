@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, email, role, openId FROM users WHERE email = 'multiservicesyamane@gmail.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 29ak51Lt2TTRzvZ.58717157f4ca --database 39wBzYNpx8L7uY7zsEkRAq --execute SELECT id, email, role, openId FROM users WHERE email = 'multiservicesyamane@gmail.com';",
+  "rows": [
+    {
+      "id": "30",
+      "email": "multiservicesyamane@gmail.com",
+      "role": "user",
+      "openId": "FwAskUMKZprDjyMPReXF8D"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\trole\topenId\n30\tmultiservicesyamane@gmail.com\tuser\tFwAskUMKZprDjyMPReXF8D\n",
+  "stderr": "",
+  "execution_time_ms": 139
+}

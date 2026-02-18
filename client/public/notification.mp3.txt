@@ -1,0 +1,2 @@
+# Son de notification - sera remplacé par un vrai fichier audio
+# Pour l'instant, utiliser l'API Web Audio pour générer un son

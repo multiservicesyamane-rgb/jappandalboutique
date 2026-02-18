@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `products` ADD `image2Url` text;\nALTER TABLE `products` ADD `image3Url` text;\nALTER TABLE `products` ADD `image4Url` text;\nALTER TABLE `products` ADD `image5Url` text;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 29ak51Lt2TTRzvZ.58717157f4ca --database 39wBzYNpx8L7uY7zsEkRAq --execute ALTER TABLE `products` ADD `image2Url` text;\nALTER TABLE `products` ADD `image3Url` text;\nALTER TABLE `products` ADD `image4Url` text;\nALTER TABLE `products` ADD `image5Url` text;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 4233
+}
