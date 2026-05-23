@@ -8,7 +8,10 @@ let queryClient: postgres.Sql | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL est manquant dans les variables d'environnement Vercel !");
+    }
     try {
       const url = process.env.DATABASE_URL;
       const isSupabase = url.includes("supabase.co");
@@ -22,8 +25,8 @@ export async function getDb() {
       });
       _db = drizzle(queryClient);
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
-      _db = null;
+      console.error("[Database] Failed to connect:", error);
+      throw error;
     }
   }
   return _db;
