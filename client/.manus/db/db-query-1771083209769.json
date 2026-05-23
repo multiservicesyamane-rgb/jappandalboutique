@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO settings (`key`, `value`, description) VALUES \n('whatsapp_phone', '+221 77 682 78 51', 'Numéro WhatsApp principal'),\n('whatsapp_phone_2', '+221 76 905 51 94', 'Numéro WhatsApp secondaire'),\n('admin_email', 'multiservicesyamane@gmail.com', 'Email administrateur'),\n('whatsapp_message_template', 'Bonjour Jappandal Boutique, je souhaite commander : [Nom du produit] - [Prix FCFA]. Quantité : ___. Mon lieu de livraison : ___. Merci !', 'Template de message WhatsApp pour les commandes'),\n('site_description', 'Votre Supermarché de Confiance', 'Slogan du site'),\n('site_values', 'Qualité, Économie, Confiance', 'Valeurs de la boutique')\nON DUPLICATE KEY UPDATE `value` = VALUES(`value`), description = VALUES(description);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 29ak51Lt2TTRzvZ.58717157f4ca --database 39wBzYNpx8L7uY7zsEkRAq --execute INSERT INTO settings (`key`, `value`, description) VALUES \n('whatsapp_phone', '+221 77 682 78 51', 'Numéro WhatsApp principal'),\n('whatsapp_phone_2', '+221 76 905 51 94', 'Numéro WhatsApp secondaire'),\n('admin_email', 'multiservicesyamane@gmail.com', 'Email administrateur'),\n('whatsapp_message_template', 'Bonjour Jappandal Boutique, je souhaite commander : [Nom du produit] - [Prix FCFA]. Quantité : ___. Mon lieu de livraison : ___. Merci !', 'Template de message WhatsApp pour les commandes'),\n('site_description', 'Votre Supermarché de Confiance', 'Slogan du site'),\n('site_values', 'Qualité, Économie, Confiance', 'Valeurs de la boutique')\nON DUPLICATE KEY UPDATE `value` = VALUES(`value`), description = VALUES(description);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 210
+}

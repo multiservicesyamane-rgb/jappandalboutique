@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getLoginUrl } from "@/const";
 import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -34,7 +33,6 @@ interface AdminLayoutProps {
 const navItems = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, section: "GENERAL" },
   { href: "/admin/produits", label: "Produits", icon: Package, section: "GENERAL" },
-  { href: "/admin/ajouter-produit", label: "Ajouter un produit", icon: Package, section: "GENERAL" },
   { href: "/admin/categories", label: "Categories", icon: FolderTree, section: "GENERAL" },
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart, section: "GENERAL" },
   { href: "/admin/clients", label: "Clients", icon: Users, section: "GENERAL" },
@@ -77,7 +75,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
               Vous devez être connecté pour accéder au dashboard administrateur.
             </p>
             <Button asChild className="w-full bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white">
-              <a href={getLoginUrl()}>Se connecter</a>
+              <Link href="/yamanetech/login">Se connecter</Link>
             </Button>
           </CardContent>
         </Card>
@@ -88,7 +86,7 @@ export function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   if (user?.role !== "admin") {
     const handleLogoutAndRedirect = async () => {
       await logout.mutateAsync();
-      window.location.href = getLoginUrl();
+      window.location.href = "/yamanetech/login";
     };
 
     return (

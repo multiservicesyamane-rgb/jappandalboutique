@@ -1,4 +1,4 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { storagePut } from "./storage";
 import { initiatePayTechPayment, checkPayTechPaymentStatus } from "./paytech";
+import { verifyAdminCredentials, createSessionToken } from "./_core/auth";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -20,12 +21,37 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    login: publicProcedure
+      .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        if (!verifyAdminCredentials(input.email, input.password)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Email ou mot de passe incorrect" });
+        }
+        // Sync admin user to DB if available (non-blocking)
+        try {
+          let user = await db.getUserByOpenId(input.email);
+          if (!user) {
+            await db.upsertUser({
+              openId: input.email,
+              name: "Administrateur",
+              email: input.email,
+              loginMethod: "local",
+              role: "admin",
+              lastSignedIn: new Date(),
+            });
+          }
+        } catch {
+          // DB unavailable — continue, JWT auth doesn't require DB
+        }
+        const token = await createSessionToken(input.email, "Administrateur");
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true } as const;
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
@@ -101,6 +127,10 @@ export const appRouter = router({
         price: z.string(),
         unit: z.string().optional(),
         imageUrl: z.string().optional(),
+        image2Url: z.string().optional(),
+        image3Url: z.string().optional(),
+        image4Url: z.string().optional(),
+        image5Url: z.string().optional(),
         categoryId: z.number(),
         badge: z.string().optional(),
         inStock: z.number().optional(),
@@ -117,6 +147,10 @@ export const appRouter = router({
         price: z.string().optional(),
         unit: z.string().optional(),
         imageUrl: z.string().optional(),
+        image2Url: z.string().optional(),
+        image3Url: z.string().optional(),
+        image4Url: z.string().optional(),
+        image5Url: z.string().optional(),
         categoryId: z.number().optional(),
         badge: z.string().optional(),
         inStock: z.number().optional(),

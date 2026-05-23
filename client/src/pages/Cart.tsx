@@ -397,7 +397,7 @@ export default function Cart() {
             </Button>
             <Button
               onClick={handlePayment}
-              disabled={!selectedPayment}
+              disabled={!selectedPayment || !acceptedTerms}
               className="flex-1 bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white"
             >
               Confirmer

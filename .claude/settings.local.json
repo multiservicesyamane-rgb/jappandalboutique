@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\Users\\\\lenovo\\\\Desktop\\\\jappandal\")",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:5000/)"
+    ]
+  }
+}

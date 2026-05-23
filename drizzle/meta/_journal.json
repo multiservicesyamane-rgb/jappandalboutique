@@ -1,47 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1771081353776,
-      "tag": "0000_gorgeous_jigsaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1771081484693,
-      "tag": "0001_closed_tony_stark",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1771082778281,
-      "tag": "0002_old_vertigo",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1771093693219,
-      "tag": "0003_handy_firestar",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1771095791106,
-      "tag": "0004_clever_the_watchers",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1771105998425,
-      "tag": "0005_mixed_johnny_storm",
+      "version": "7",
+      "when": 1779479091311,
+      "tag": "0000_wide_gauntlet",
       "breakpoints": true
     }
   ]

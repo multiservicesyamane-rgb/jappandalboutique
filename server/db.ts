@@ -1,15 +1,17 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertUser, users, categories, products, orders, customers, settings, banners, affiliateLinks, adBanners, productDrafts, productMedia, productSpecs, InsertCategory, InsertProduct, InsertOrder, InsertCustomer, InsertSetting, InsertBanner, InsertAffiliateLink, InsertAdBanner, InsertProductDraft, InsertProductMedia, InsertProductSpec } from "../drizzle/schema";
-import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let queryClient: postgres.Sql | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      queryClient = postgres(process.env.DATABASE_URL);
+      _db = drizzle(queryClient);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -55,9 +57,6 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
     }
 
     if (!values.lastSignedIn) {
@@ -68,7 +67,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
+    await db.insert(users).values(values).onConflictDoUpdate({
+      target: users.openId,
       set: updateSet,
     });
   } catch (error) {
@@ -209,15 +209,15 @@ export async function deleteOrder(id: number) {
 
 export async function getOrderStats() {
   const db = await getDb();
-  if (!db) return { total: 0, pending: 0, confirmed: 0, delivered: 0 };
+  if (!db) return { total: 0, pending: 0, contacted: 0, confirmed: 0, delivered: 0, cancelled: 0 };
   
   const result = await db.select({
-    total: sql<number>`COUNT(*)`,
-    pending: sql<number>`SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END)`,
-    contacted: sql<number>`SUM(CASE WHEN status = 'contacted' THEN 1 ELSE 0 END)`,
-    confirmed: sql<number>`SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END)`,
-    delivered: sql<number>`SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END)`,
-    cancelled: sql<number>`SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)`,
+    total: sql<number>`cast(count(*) as int)`,
+    pending: sql<number>`cast(sum(case when status = 'pending' then 1 else 0 end) as int)`,
+    contacted: sql<number>`cast(sum(case when status = 'contacted' then 1 else 0 end) as int)`,
+    confirmed: sql<number>`cast(sum(case when status = 'confirmed' then 1 else 0 end) as int)`,
+    delivered: sql<number>`cast(sum(case when status = 'delivered' then 1 else 0 end) as int)`,
+    cancelled: sql<number>`cast(sum(case when status = 'cancelled' then 1 else 0 end) as int)`,
   }).from(orders);
   
   return result[0] || { total: 0, pending: 0, contacted: 0, confirmed: 0, delivered: 0, cancelled: 0 };
@@ -357,13 +357,13 @@ export async function getDashboardStats() {
     pendingOrders: 0,
   };
 
-  const [productsCount] = await db.select({ count: sql<number>`count(*)` }).from(products);
-  const [categoriesCount] = await db.select({ count: sql<number>`count(*)` }).from(categories);
-  const [customersCount] = await db.select({ count: sql<number>`count(*)` }).from(customers);
-  const [ordersCount] = await db.select({ count: sql<number>`count(*)` }).from(orders);
-  const [revenueSum] = await db.select({ total: sql<string>`COALESCE(SUM(totalAmount), 0)` }).from(orders).where(eq(orders.status, 'delivered'));
-  const [todayCount] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(sql`DATE(createdAt) = CURDATE()`);
-  const [pendingCount] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, 'pending'));
+  const [productsCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(products);
+  const [categoriesCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(categories);
+  const [customersCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(customers);
+  const [ordersCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(orders);
+  const [revenueSum] = await db.select({ total: sql<string>`COALESCE(SUM("totalAmount"), 0)` }).from(orders).where(eq(orders.status, 'delivered'));
+  const [todayCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(orders).where(sql`DATE("createdAt") = CURRENT_DATE`);
+  const [pendingCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(orders).where(eq(orders.status, 'pending'));
 
   return {
     totalProducts: Number(productsCount?.count || 0),

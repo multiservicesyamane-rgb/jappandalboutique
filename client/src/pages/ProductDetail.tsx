@@ -1,4 +1,4 @@
-import { Link, useParams } from "wouter";
+import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";

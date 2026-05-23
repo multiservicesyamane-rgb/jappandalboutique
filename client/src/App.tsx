@@ -23,7 +23,7 @@ import AdminStatistics from "./pages/admin/Statistics";
 import AdminAppearance from "./pages/admin/Appearance";
 import AdminAffiliateLinks from "./pages/admin/AffiliateLinks";
 import AdminAdBanners from "./pages/admin/AdBanners";
-import AddProduct from "./pages/admin/AddProduct";
+import AdminLogin from "./pages/admin/Login";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
 
@@ -40,10 +40,12 @@ function Router() {
       <Route path="/paiement-succes" component={PaymentSuccess} />
       <Route path="/paiement-annule" component={PaymentCancel} />
       
+      {/* Admin Login (URL secrète) */}
+      <Route path="/yamanetech/login" component={AdminLogin} />
+
       {/* Admin Routes */}
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/produits" component={AdminProducts} />
-      <Route path="/admin/ajouter-produit" component={AddProduct} />
       <Route path="/admin/categories" component={AdminCategories} />
       <Route path="/admin/commandes" component={AdminOrders} />
       <Route path="/admin/clients" component={AdminCustomers} />

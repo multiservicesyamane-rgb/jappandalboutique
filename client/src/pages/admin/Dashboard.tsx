@@ -102,10 +102,10 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               {[
                 { label: "En attente", value: orderStats?.pending || 0, color: "bg-yellow-100 text-yellow-700" },
-                { label: "Contactées", value: (orderStats as any)?.contacted || 0, color: "bg-blue-100 text-blue-700" },
+                { label: "Contactées", value: orderStats?.contacted || 0, color: "bg-blue-100 text-blue-700" },
                 { label: "Confirmées", value: orderStats?.confirmed || 0, color: "bg-indigo-100 text-indigo-700" },
                 { label: "Livrées", value: orderStats?.delivered || 0, color: "bg-blue-100 text-blue-700" },
-                { label: "Annulées", value: (orderStats as any)?.cancelled || 0, color: "bg-red-100 text-red-700" },
+                { label: "Annulées", value: orderStats?.cancelled || 0, color: "bg-red-100 text-red-700" },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div className={`rounded-xl py-3 px-2 ${stat.color}`}>
