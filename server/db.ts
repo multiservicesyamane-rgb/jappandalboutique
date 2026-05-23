@@ -18,6 +18,7 @@ export async function getDb() {
         connect_timeout: 10, // Fail after 10 seconds instead of hanging
         idle_timeout: 10,
         max: 5,
+        prepare: false, // REQUIRED for Supabase pooler (port 6543)
       });
       _db = drizzle(queryClient);
     } catch (error) {
