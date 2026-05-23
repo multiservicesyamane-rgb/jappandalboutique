@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { nodeHTTPRequestHandler } from "@trpc/server/adapters/node-http";
 import { appRouter } from "../../server/routers";
 import { parse as parseCookieHeader } from "cookie";
 import { verifySessionToken } from "../../server/_core/auth";
@@ -38,18 +38,6 @@ async function resolveUser(req: VercelRequest): Promise<User | null> {
   return null;
 }
 
-// Build Express-compatible middleware once
-const trpcMiddleware = createExpressMiddleware({
-  router: appRouter,
-  createContext: async ({ req, res }) => {
-    const user = await resolveUser(req as any);
-    return { req, res, user } as any;
-  },
-  onError: ({ error, path }) => {
-    console.error(`[tRPC] Error on ${path}:`, error.message);
-  },
-});
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
@@ -61,10 +49,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Rewrite URL path so tRPC sees the correct procedure path
-  // Vercel sends the full path like /api/trpc/products.list
-  // tRPC middleware expects the path after /api/trpc/
-  return trpcMiddleware(req as any, res as any, () => {
-    res.status(404).json({ error: "Not found" });
+  // In Vercel, the dynamic route parameter [trpc] is available in req.query.trpc
+  const path = (req.query.trpc as string) || "";
+
+  return nodeHTTPRequestHandler({
+    router: appRouter,
+    req,
+    res,
+    path,
+    createContext: async () => {
+      const user = await resolveUser(req);
+      return { req, res, user } as any;
+    },
+    onError: ({ error, path }) => {
+      console.error(`[tRPC] Error on ${path}:`, error.message);
+    },
   });
 }
