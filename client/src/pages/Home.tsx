@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   ChevronRight, Truck, ShieldCheck,
   Clock, BadgePercent, ShoppingBag, MessageCircle,
-  ShoppingCart, Check, Flame
+  ShoppingCart, Check, Flame, Star, Zap
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -22,6 +22,7 @@ export default function Home() {
   const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
 
   const [justAddedId, setJustAddedId] = useState<number | null>(null);
+  const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
   // Group products by category
   const productsByCategory = categories?.map((cat) => ({
@@ -108,115 +109,115 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+  // Auto-scroll categories
+  useEffect(() => {
+    const el = categoriesScrollRef.current;
+    if (!el) return;
+    let scrollPos = 0;
+    const speed = 0.5;
+    let animId: number;
+    const animate = () => {
+      scrollPos += speed;
+      if (scrollPos >= el.scrollWidth - el.clientWidth) scrollPos = 0;
+      el.scrollLeft = scrollPos;
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+    const pause = () => cancelAnimationFrame(animId);
+    const resume = () => { animId = requestAnimationFrame(animate); };
+    el.addEventListener("pointerdown", pause);
+    el.addEventListener("pointerup", resume);
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", resume);
+    return () => {
+      cancelAnimationFrame(animId);
+      el.removeEventListener("pointerdown", pause);
+      el.removeEventListener("pointerup", resume);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", resume);
+    };
+  }, [categories]);
+
+  const advantages = [
+    { icon: Truck, label: "Livraison 24h", sub: "Dakar & Banlieue" },
+    { icon: ShieldCheck, label: "Qualité garantie", sub: "Frais & sélectionné" },
+    { icon: BadgePercent, label: "Meilleurs prix", sub: "Qualité/prix imbattable" },
+    { icon: Clock, label: "Service 7j/7", sub: "Réactivité assurée" },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] text-white shadow-premium-xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,210,78,0.15),transparent_50%)]" />
-        <div className="container py-8 md:py-14 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
-            <div className="flex-1 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold mb-4 backdrop-blur-sm border border-white/10">
-                <Flame className="h-3.5 w-3.5 text-[#A8D24E]" />
-                Boutique Officielle Jappandal
-              </span>
-              <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">
-                Vos courses en un clic,<br />
-                <span className="text-[#A8D24E] text-glow">sans vous déplacer !</span>
+      {/* ─── MINI HERO BANNER ─── */}
+      <section className="bg-gradient-to-r from-[#1E5A8E] via-[#164a73] to-[#0D3B0D] text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,210,78,0.12),transparent_50%)]" />
+        <div className="container py-3 sm:py-4 md:py-6 relative z-10">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm sm:text-base md:text-xl lg:text-2xl font-extrabold leading-snug">
+                {settings.shopName} — <span className="text-[#A8D24E]">Dakar</span>
               </h1>
-              <p className="text-sm md:text-lg opacity-90 mb-6 max-w-xl">
-                {settings.shopSlogan || "Produits de qualité supérieure, packs festifs et livraison express à Dakar."}
+              <p className="text-[10px] sm:text-xs md:text-sm opacity-80 mt-0.5 line-clamp-1">
+                {settings.shopSlogan || "Produits frais, packs festifs & livraison express"}
               </p>
-              <div className="flex flex-wrap justify-center md:justify-start gap-3">
+              <div className="flex gap-2 mt-2">
                 <Link href="/produits">
-                  <span className="inline-flex items-center gap-2 bg-[#A8D24E] hover:bg-[#92ba3d] text-white text-sm font-bold px-6 py-3 rounded-full transition-all shadow-lg active:scale-95 cursor-pointer">
-                    <ShoppingBag className="h-4 w-4" />
-                    Découvrir nos produits
+                  <span className="inline-flex items-center gap-1.5 bg-[#A8D24E] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow active:scale-95 cursor-pointer">
+                    <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    Voir le catalogue
                   </span>
                 </Link>
                 <a
                   href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white text-sm font-bold px-6 py-3 rounded-full transition-all shadow-lg active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow active:scale-95"
                 >
-                  <MessageCircle className="h-4 w-4" />
-                  Commander par WhatsApp
+                  <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  WhatsApp
                 </a>
               </div>
             </div>
-            <div className="hidden md:block">
-              <div className="relative p-2 bg-gradient-to-tr from-[#A8D24E] to-[#1E5A8E] rounded-full shadow-2xl">
-                <img
-                  src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
-                  alt={settings.shopName}
-                  className="h-44 w-44 rounded-full border-4 border-white object-cover"
-                />
-              </div>
-            </div>
+            <img
+              src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
+              alt={settings.shopName}
+              className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-2 border-white/30 object-cover flex-shrink-0 shadow-lg"
+            />
           </div>
         </div>
       </section>
 
-      {/* Advantages bar */}
-      <section className="bg-white border-b shadow-sm relative z-20">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-gray-100">
-            {[
-              { icon: Truck, label: "Livraison rapide", sub: "À domicile à Dakar & Banlieue" },
-              { icon: ShieldCheck, label: "Qualité garantie", sub: "Frais, propre & sélectionné" },
-              { icon: BadgePercent, label: "Meilleurs prix", sub: "Rapport qualité/prix imbattable" },
-              { icon: Clock, label: "Service client 7j/7", sub: "Écoute active & réactivité" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 py-4 px-3 md:px-6"
-              >
-                <div className="p-2 rounded-lg bg-[#1E5A8E]/5 text-[#1E5A8E]">
-                  <item.icon className="h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
-                </div>
-                <div>
-                  <div className="text-xs md:text-sm font-bold text-gray-800 leading-tight">{item.label}</div>
-                  <div className="text-[10px] md:text-xs text-gray-500 mt-0.5">{item.sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories horizontal scroll */}
-      <section className="bg-white py-6 border-b">
-        <div className="container">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base md:text-xl font-extrabold text-gray-900">Nos Rayons</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Parcourez nos différentes catégories de produits</p>
-            </div>
+      {/* ─── CATEGORIES: small round circles, auto-scroll ─── */}
+      <section className="bg-white border-b">
+        <div className="py-2 sm:py-3">
+          <div
+            ref={categoriesScrollRef}
+            className="flex overflow-x-auto gap-3 sm:gap-4 px-3 sm:px-4 scrollbar-hide"
+          >
+            {/* "Tout voir" pill */}
             <Link href="/categories">
-              <span className="text-xs md:text-sm text-[#1E5A8E] hover:underline font-bold flex items-center gap-1">
-                Voir tout <ChevronRight className="h-4 w-4" />
-              </span>
+              <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1E5A8E] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+                <span className="text-[9px] sm:text-[10px] font-bold text-[#1E5A8E] leading-tight text-center">Tout voir</span>
+              </div>
             </Link>
-          </div>
-          
-          <div className="flex overflow-x-auto gap-4 -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
             {categoriesLoading
               ? [...Array(6)].map((_, i) => (
-                  <div key={i} className="flex-shrink-0 w-24 animate-pulse">
-                    <div className="w-16 h-16 rounded-full bg-gray-200 mx-auto mb-2" />
-                    <div className="h-3 bg-gray-200 rounded w-16 mx-auto" />
+                  <div key={i} className="flex-shrink-0 flex flex-col items-center gap-1 w-14 sm:w-16 animate-pulse">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200" />
+                    <div className="h-2 bg-gray-200 rounded w-10" />
                   </div>
                 ))
               : categories?.map((cat) => (
                   <Link key={cat.id} href={`/categories/${cat.slug}`}>
-                    <div className="flex-shrink-0 w-24 text-center group cursor-pointer">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1E5A8E]/5 to-[#A8D24E]/10 flex items-center justify-center mx-auto mb-2 group-hover:from-[#1E5A8E]/10 group-hover:to-[#A8D24E]/20 transition-all group-hover:scale-105 shadow-sm border border-gray-100">
-                        <span className="text-3xl group-hover:scale-110 transition-transform">{cat.emoji || "📦"}</span>
+                    <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-center justify-center group-hover:border-[#1E5A8E]/40 group-hover:shadow-md transition-all group-hover:scale-105">
+                        <span className="text-lg sm:text-xl">{cat.emoji || "📦"}</span>
                       </div>
-                      <span className="text-xs font-bold text-gray-700 group-hover:text-[#1E5A8E] transition-colors line-clamp-2 leading-tight">
+                      <span className="text-[9px] sm:text-[10px] font-semibold text-gray-600 group-hover:text-[#1E5A8E] leading-tight text-center line-clamp-1 w-full">
                         {cat.name}
                       </span>
                     </div>
@@ -226,183 +227,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Ventes Flash Tabaski Section (SUBLIME & HIGH CONVERTING) */}
-      {tabaskiProducts.length > 0 && (
-        <section className="py-8 bg-slate-50 border-b relative overflow-hidden">
-          <div className="container">
-            {/* Header Banner */}
-            <div className="bg-gradient-to-r from-[#4A148C] via-[#7B1FA2] to-[#311B92] rounded-2xl p-4 md:p-6 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xl border border-purple-500/20 mb-6">
-              <div className="flex flex-wrap items-center gap-3 text-center lg:text-left justify-center lg:justify-start">
-                <span className="bg-amber-400 text-purple-950 font-black text-[10px] md:text-xs uppercase px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md animate-pulse">
-                  ⚡ OFFRES SPÉCIALES
-                </span>
-                <h2 className="text-white font-black text-lg md:text-2xl tracking-tight flex items-center gap-2 justify-center">
-                  <span>🐏</span> Ventes Flash Tabaski 2026
-                </h2>
+      {/* ─── ADVANTAGES TICKER (auto-scroll inline) ─── */}
+      <section className="bg-white border-b overflow-hidden">
+        <div className="advantages-ticker py-2">
+          <div className="advantages-ticker-track">
+            {[...advantages, ...advantages, ...advantages].map((item, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 px-3 sm:px-4 whitespace-nowrap"
+              >
+                <item.icon className="h-3.5 w-3.5 text-[#1E5A8E] flex-shrink-0" />
+                <span className="text-[10px] sm:text-xs font-bold text-gray-800">{item.label}</span>
+                <span className="text-[9px] sm:text-[10px] text-gray-400 hidden sm:inline">— {item.sub}</span>
               </div>
-
-              {/* Countdown Timer */}
-              <div className="flex items-center gap-2 bg-black/30 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
-                <span className="text-purple-200 text-[10px] md:text-xs font-bold uppercase tracking-wider">Fin dans</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center bg-white/15 text-white font-extrabold text-xs md:text-sm px-2.5 py-1 rounded border border-white/10 min-w-[34px] md:min-w-[40px] justify-center">
-                    {timeLeft.days.toString().padStart(2, "0")}
-                  </div>
-                  <span className="text-amber-400 font-extrabold text-xs">J</span>
-                  <div className="flex items-center bg-white/15 text-white font-extrabold text-xs md:text-sm px-2.5 py-1 rounded border border-white/10 min-w-[34px] md:min-w-[40px] justify-center">
-                    {timeLeft.hours.toString().padStart(2, "0")}
-                  </div>
-                  <span className="text-amber-400 font-extrabold text-xs">H</span>
-                  <div className="flex items-center bg-white/15 text-white font-extrabold text-xs md:text-sm px-2.5 py-1 rounded border border-white/10 min-w-[34px] md:min-w-[40px] justify-center">
-                    {timeLeft.minutes.toString().padStart(2, "0")}
-                  </div>
-                  <span className="text-amber-400 font-extrabold text-xs">M</span>
-                  <div className="flex items-center bg-white/15 text-white font-extrabold text-xs md:text-sm px-2.5 py-1 rounded border border-white/10 min-w-[34px] md:min-w-[40px] justify-center">
-                    {timeLeft.seconds.toString().padStart(2, "0")}
-                  </div>
-                  <span className="text-amber-400 font-extrabold text-xs">S</span>
-                </div>
-              </div>
-
-              <Link href={`/categories/packs-tabaski`}>
-                <span className="bg-amber-400 hover:bg-amber-500 text-purple-950 font-black text-xs md:text-sm px-5 py-2.5 rounded-full transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap">
-                  Tout voir →
-                </span>
-              </Link>
-            </div>
-
-            {/* Horizontal Product List */}
-            <div className="flex overflow-x-auto gap-4 -mx-4 px-4 md:mx-0 md:px-0 pb-4 scrollbar-hide">
-              {tabaskiProducts.map((product, index) => {
-                const formattedPrice = parseFloat(product.price).toLocaleString("fr-FR");
-                const originalPrice = getOriginalPrice(product.price);
-                const discount = getDiscountPercent(product.price);
-                const isJustAdded = justAddedId === product.id;
-
-                return (
-                  <div
-                    key={product.id}
-                    className="flex-shrink-0 w-[70vw] sm:w-[45vw] md:w-[280px] bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-premium hover:shadow-premium-xl transition-all hover:-translate-y-1.5 flex flex-col group relative"
-                  >
-                    {/* Index Circular Badge */}
-                    <div className="absolute top-3 left-3 z-10 w-7 h-7 bg-[#7B1FA2] text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
-                      {index + 1}
-                    </div>
-
-                    {/* Discount Capsule Badge */}
-                    <div className="absolute top-3 right-3 z-10 bg-red-500 text-white text-[10px] md:text-xs font-black px-2.5 py-1 rounded-full shadow-md">
-                      {discount}
-                    </div>
-
-                    {/* Image Area */}
-                    <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden flex items-center justify-center">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <span className="text-4xl">📦</span>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="text-sm font-extrabold text-gray-900 group-hover:text-[#7B1FA2] transition-colors line-clamp-1 mb-2">
-                          {product.name}
-                        </h3>
-
-                        {/* Ingredients / Description List */}
-                        <div className="text-[11px] text-gray-500 space-y-1 mb-4 bg-purple-50/50 p-2.5 rounded-xl border border-purple-500/5">
-                          {product.description?.split("\n").map((line, lIdx) => (
-                            <p key={lIdx} className="line-clamp-1 flex items-center gap-1 font-medium text-gray-600">
-                              <span className="text-[#7B1FA2] text-[8px]">●</span>
-                              {line.replace("•", "").trim()}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        {/* Prices */}
-                        <div className="flex items-baseline justify-between mb-3 border-t border-gray-100 pt-3">
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-400 line-through leading-none mb-1">
-                              {originalPrice} FCFA
-                            </span>
-                            <span className="text-base md:text-lg font-black text-[#7B1FA2]">
-                              {formattedPrice} <span className="text-xs font-bold text-gray-500">FCFA</span>
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-gray-400 font-semibold bg-gray-100 px-2 py-0.5 rounded-md">
-                            {product.unit || "Pack"}
-                          </span>
-                        </div>
-
-                        {/* Add to Cart button */}
-                        <button
-                          onClick={(e) => handleAddPackToCart(e, product)}
-                          className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-xs md:text-sm font-black transition-all ${
-                            isJustAdded
-                              ? "bg-purple-900 text-white shadow-md shadow-purple-900/20"
-                              : "bg-amber-400 hover:bg-amber-500 text-purple-950 shadow-md shadow-amber-400/10 active:scale-95"
-                          }`}
-                        >
-                          {isJustAdded ? (
-                            <>
-                              <Check className="h-4 w-4" />
-                              Ajouté au panier !
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart className="h-4 w-4" />
-                              Ajouter au panier
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* Featured Products */}
-      <section className="py-8">
+      {/* ─── FEATURED PRODUCTS (visible first!) ─── */}
+      <section className="py-3 sm:py-4">
         <div className="container">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-base md:text-xl font-extrabold text-gray-900">Produits Vedettes</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Nos articles les plus appréciés & recommandés</p>
-            </div>
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900">Produits Vedettes</h2>
             <Link href="/produits">
-              <span className="text-xs md:text-sm text-[#1E5A8E] hover:underline font-bold flex items-center gap-1">
-                Voir plus <ChevronRight className="h-4 w-4" />
+              <span className="text-[10px] sm:text-xs text-[#1E5A8E] hover:underline font-bold flex items-center gap-0.5">
+                Voir plus <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </span>
             </Link>
           </div>
 
           {productsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl animate-pulse border">
-                  <div className="aspect-[4/3] bg-gray-200 rounded-t-xl" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-3.5 bg-gray-200 rounded w-full" />
-                    <div className="h-4 bg-gray-200 rounded w-2/3" />
-                    <div className="h-8 bg-gray-200 rounded w-full" />
+                <div key={i} className="bg-white rounded-lg animate-pulse border">
+                  <div className="aspect-square bg-gray-200 rounded-t-lg" />
+                  <div className="p-2 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-full" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    <div className="h-7 bg-gray-200 rounded w-full" />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
               {featuredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -421,34 +290,132 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Products by Category */}
+      {/* ─── VENTES FLASH TABASKI (brand colors) ─── */}
+      {tabaskiProducts.length > 0 && (
+        <section className="py-3 sm:py-4 bg-gradient-to-b from-white to-gray-50 border-t border-b">
+          <div className="container">
+            {/* Header: one line, brand colors */}
+            <div className="bg-gradient-to-r from-[#1E5A8E] via-[#0D3B0D] to-[#1E5A8E] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2 mb-3 shadow-md">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="bg-[#A8D24E] text-white text-[8px] sm:text-[9px] font-black uppercase px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-0.5 flex-shrink-0 animate-pulse">
+                  <Zap className="h-2.5 w-2.5" /> OFFRES
+                </span>
+                <span className="text-white font-black text-xs sm:text-sm md:text-base truncate">
+                  🐏 Ventes Flash Tabaski
+                </span>
+              </div>
+              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                {/* Compact countdown */}
+                <div className="flex items-center gap-0.5 bg-black/25 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
+                  {[
+                    { v: timeLeft.days, l: "J" },
+                    { v: timeLeft.hours, l: "H" },
+                    { v: timeLeft.minutes, l: "M" },
+                    { v: timeLeft.seconds, l: "S" },
+                  ].map((t, i) => (
+                    <span key={i} className="flex items-center">
+                      <span className="text-white font-bold text-[9px] sm:text-[10px] tabular-nums">{t.v.toString().padStart(2, "0")}</span>
+                      <span className="text-[#A8D24E] font-bold text-[8px] sm:text-[9px] mr-0.5">{t.l}</span>
+                    </span>
+                  ))}
+                </div>
+                <Link href="/categories/packs-tabaski">
+                  <span className="bg-[#A8D24E] hover:bg-[#92ba3d] text-white font-bold text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full active:scale-95 cursor-pointer whitespace-nowrap">
+                    Tout voir
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Horizontal Product List */}
+            <div className="flex overflow-x-auto gap-2.5 sm:gap-3 -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
+              {tabaskiProducts.map((product, index) => {
+                const formattedPrice = parseFloat(product.price).toLocaleString("fr-FR");
+                const originalPrice = getOriginalPrice(product.price);
+                const discount = getDiscountPercent(product.price);
+                const isJustAdded = justAddedId === product.id;
+
+                return (
+                  <div
+                    key={product.id}
+                    className="flex-shrink-0 w-[42vw] sm:w-[35vw] md:w-[220px] bg-white rounded-lg sm:rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group relative"
+                  >
+                    {/* Discount Badge */}
+                    <div className="absolute top-1.5 right-1.5 z-10 bg-red-500 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">
+                      {discount}
+                    </div>
+
+                    {/* Image */}
+                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="p-2 sm:p-2.5 flex-1 flex flex-col justify-between">
+                      <h3 className="text-[11px] sm:text-xs font-bold text-gray-900 line-clamp-2 mb-1.5 leading-tight">
+                        {product.name}
+                      </h3>
+                      <div>
+                        <div className="flex items-baseline gap-1 mb-1.5">
+                          <span className="text-xs sm:text-sm font-black text-[#1E5A8E]">{formattedPrice}</span>
+                          <span className="text-[8px] sm:text-[9px] text-gray-400">FCFA</span>
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] text-gray-400 line-through block mb-1.5">{originalPrice} FCFA</span>
+                        <button
+                          onClick={(e) => handleAddPackToCart(e, product)}
+                          className={`w-full flex items-center justify-center gap-1 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
+                            isJustAdded
+                              ? "bg-[#0D3B0D] text-white"
+                              : "bg-[#A8D24E] hover:bg-[#92ba3d] text-white active:scale-95"
+                          }`}
+                        >
+                          {isJustAdded ? (
+                            <><Check className="h-3 w-3" /> Ajouté !</>
+                          ) : (
+                            <><ShoppingCart className="h-3 w-3" /> Ajouter</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── PRODUCTS BY CATEGORY ─── */}
       {productsByCategory
         .filter((cat) => cat.products.length > 0 && cat.slug !== "packs-tabaski")
         .map((cat) => (
-          <section key={cat.id} className="py-6 border-t border-gray-100 bg-white">
+          <section key={cat.id} className="py-3 sm:py-4 border-t border-gray-100 bg-white">
             <div className="container">
-              {/* Category header */}
-              <div className="flex items-center justify-between mb-4 bg-gradient-to-r from-[#1E5A8E] to-[#1E5A8E]/80 rounded-xl px-4 py-3 shadow-md">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl md:text-2xl">{cat.emoji || "📦"}</span>
-                  <div>
-                    <h2 className="text-xs md:text-sm font-extrabold text-white uppercase tracking-wider">{cat.name}</h2>
-                    {cat.description && (
-                      <p className="text-[10px] md:text-xs text-white/80 line-clamp-1 mt-0.5">{cat.description}</p>
-                    )}
-                  </div>
+              {/* Category header - compact */}
+              <div className="flex items-center justify-between mb-2 sm:mb-3 bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] rounded-lg px-3 py-2 shadow-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-base sm:text-lg">{cat.emoji || "📦"}</span>
+                  <h2 className="text-[10px] sm:text-xs font-bold text-white uppercase tracking-wide truncate">{cat.name}</h2>
                 </div>
                 <Link href={`/categories/${cat.slug}`}>
-                  <span className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-0.5 whitespace-nowrap">
-                    Voir plus <ChevronRight className="h-4 w-4" />
+                  <span className="text-[10px] sm:text-xs font-bold text-[#A8D24E] flex items-center gap-0.5 whitespace-nowrap">
+                    Voir <ChevronRight className="h-3 w-3" />
                   </span>
                 </Link>
               </div>
 
-              {/* Horizontal scroll of products */}
-              <div className="flex overflow-x-auto gap-4 -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
+              {/* Horizontal scroll */}
+              <div className="flex overflow-x-auto gap-2 sm:gap-3 -mx-4 px-4 md:mx-0 md:px-0 pb-1 scrollbar-hide">
                 {cat.products.slice(0, 8).map((product) => (
-                  <div key={product.id} className="flex-shrink-0 w-[45vw] md:w-[200px]">
+                  <div key={product.id} className="flex-shrink-0 w-[40vw] sm:w-[30vw] md:w-[180px]">
                     <ProductCard
                       id={product.id}
                       name={product.name}
@@ -466,29 +433,27 @@ export default function Home() {
           </section>
         ))}
 
-      {/* CTA WhatsApp */}
-      <section className="py-12 md:py-16 bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] text-white relative overflow-hidden">
+      {/* ─── CTA WhatsApp ─── */}
+      <section className="py-6 sm:py-8 md:py-12 bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(168,210,78,0.1),transparent_40%)]" />
         <div className="container text-center relative z-10">
-          <h2 className="text-xl md:text-3xl font-extrabold mb-3">Besoin d'aide ou d'une commande personnalisée ?</h2>
-          <p className="text-xs md:text-base opacity-90 mb-6 max-w-xl mx-auto">
-            Notre équipe est à votre disposition 7j/7 pour répondre à toutes vos questions et livrer vos produits en temps record.
+          <h2 className="text-sm sm:text-base md:text-2xl font-extrabold mb-1.5 sm:mb-2">Besoin d'aide ?</h2>
+          <p className="text-[10px] sm:text-xs md:text-sm opacity-80 mb-3 sm:mb-4 max-w-md mx-auto">
+            Équipe disponible 7j/7 pour vos commandes personnalisées.
           </p>
-          <div className="flex justify-center gap-3">
+          <div className="flex flex-col sm:flex-row justify-center gap-2">
             <Link href="/panier">
-              <span className="inline-flex items-center gap-2 bg-[#A8D24E] hover:bg-[#92ba3d] text-white text-sm font-bold px-6 py-3 rounded-full transition-all shadow-md active:scale-95 cursor-pointer">
-                <ShoppingBag className="h-4.5 w-4.5" />
-                Consulter mon panier
+              <span className="inline-flex items-center justify-center gap-1.5 bg-[#A8D24E] text-white text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full shadow active:scale-95 cursor-pointer w-full sm:w-auto">
+                <ShoppingBag className="h-3.5 w-3.5" /> Mon panier
               </span>
             </Link>
             <a
               href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white text-sm font-bold px-6 py-3 rounded-full transition-all shadow-md active:scale-95 cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#25D366] text-white text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full shadow active:scale-95 w-full sm:w-auto"
             >
-              <MessageCircle className="h-4.5 w-4.5" />
-              WhatsApp direct
+              <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
             </a>
           </div>
         </div>
@@ -503,8 +468,8 @@ export default function Home() {
         rel="noopener noreferrer"
         className="fixed bottom-6 right-4 z-40 md:hidden"
       >
-        <div className="w-14 h-14 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:bg-[#20BA5A] transition-colors animate-bounce">
-          <MessageCircle className="h-7 w-7 text-white" />
+        <div className="w-12 h-12 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:bg-[#20BA5A] transition-colors animate-bounce">
+          <MessageCircle className="h-6 w-6 text-white" />
         </div>
       </a>
     </div>
