@@ -21,9 +21,16 @@ async function seed() {
   ];
 
   console.log('Insertion des catégories...');
-  const insertedCategories = await db.insert(schema.categories).values(categoriesData).returning();
+  const insertedCategories = await db.insert(schema.categories).values(categoriesData).onConflictDoNothing().returning();
   
-  const getCatId = (slug: string) => insertedCategories.find(c => c.slug === slug)?.id || insertedCategories[0].id;
+  // Si les catégories existent déjà, on les récupère
+  let allCategories = insertedCategories;
+  if (allCategories.length === 0) {
+    allCategories = await db.select().from(schema.categories);
+  }
+  
+  
+  const getCatId = (slug: string) => allCategories.find(c => c.slug === slug)?.id || allCategories[0]?.id;
 
   // Products
   const productsData = [
@@ -118,7 +125,7 @@ async function seed() {
   ];
 
   console.log('Insertion des produits...');
-  await db.insert(schema.products).values(productsData);
+  await db.insert(schema.products).values(productsData).onConflictDoNothing();
 
   console.log('🎉 Terminé avec succès !');
   process.exit(0);

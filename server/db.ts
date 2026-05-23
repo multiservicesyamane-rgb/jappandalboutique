@@ -10,7 +10,15 @@ let queryClient: postgres.Sql | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      queryClient = postgres(process.env.DATABASE_URL);
+      const url = process.env.DATABASE_URL;
+      const isSupabase = url.includes("supabase.co");
+      
+      queryClient = postgres(url, {
+        ssl: isSupabase ? "require" : false,
+        connect_timeout: 10, // Fail after 10 seconds instead of hanging
+        idle_timeout: 10,
+        max: 5,
+      });
       _db = drizzle(queryClient);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
