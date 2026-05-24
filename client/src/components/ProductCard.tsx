@@ -42,8 +42,8 @@ export function ProductCard({
   const formattedPrice = parseFloat(price).toLocaleString("fr-FR");
 
   return (
-    <Link href={`/produits/${id}`}>
-      <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-premium hover:shadow-premium-lg hover-lift group cursor-pointer h-full flex flex-col">
+    <Link href={`/produits/${id}`} className="block h-full">
+      <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow group cursor-pointer h-full flex flex-col">
         {/* Image */}
         <div className={`relative bg-gray-50 overflow-hidden ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
           {imageUrl ? (
@@ -115,7 +115,7 @@ export function ProductCard({
             ) : (
               <>
                 <ShoppingCart className="h-3.5 w-3.5" />
-                Ajouter au panier
+                {compact ? "Ajouter" : "Ajouter au panier"}
               </>
             )}
           </button>

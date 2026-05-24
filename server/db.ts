@@ -2,6 +2,7 @@ import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, users, categories, products, orders, customers, settings, banners, affiliateLinks, adBanners, productDrafts, productMedia, productSpecs, InsertCategory, InsertProduct, InsertOrder, InsertCustomer, InsertSetting, InsertBanner, InsertAffiliateLink, InsertAdBanner, InsertProductDraft, InsertProductMedia, InsertProductSpec } from "../drizzle/schema";
+import { resolveImageUrl } from "./storage";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let queryClient: postgres.Sql | null = null;
@@ -141,30 +142,45 @@ export async function deleteCategory(id: number) {
   await db.delete(categories).where(eq(categories.id, id));
 }
 
+// Resolve legacy /uploads/ image paths to full Supabase Storage URLs
+function fixProductImages<T extends { imageUrl?: string | null; image2Url?: string | null; image3Url?: string | null; image4Url?: string | null; image5Url?: string | null }>(p: T): T {
+  return {
+    ...p,
+    imageUrl: resolveImageUrl(p.imageUrl),
+    image2Url: resolveImageUrl(p.image2Url),
+    image3Url: resolveImageUrl(p.image3Url),
+    image4Url: resolveImageUrl(p.image4Url),
+    image5Url: resolveImageUrl(p.image5Url),
+  };
+}
+
 // Products helpers
 export async function getAllProducts() {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(products).orderBy(desc(products.createdAt));
+  const rows = await db.select().from(products).orderBy(desc(products.createdAt));
+  return rows.map(fixProductImages);
 }
 
 export async function getProductById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  return result.length > 0 ? fixProductImages(result[0]) : undefined;
 }
 
 export async function getProductsByCategory(categoryId: number) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(desc(products.createdAt));
+  const rows = await db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(desc(products.createdAt));
+  return rows.map(fixProductImages);
 }
 
 export async function searchProducts(query: string) {
   const db = await getDb();
   if (!db) return [];
-  return await db.select().from(products).where(like(products.name, `%${query}%`)).orderBy(desc(products.createdAt));
+  const rows = await db.select().from(products).where(like(products.name, `%${query}%`)).orderBy(desc(products.createdAt));
+  return rows.map(fixProductImages);
 }
 
 export async function createProduct(product: InsertProduct) {

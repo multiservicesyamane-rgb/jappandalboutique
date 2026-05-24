@@ -30,8 +30,8 @@ export default function Home() {
     products: products?.filter((p) => p.categoryId === cat.id) || [],
   })) || [];
 
-  // Featured products (first 6)
-  const featuredProducts = products?.slice(0, 6) || [];
+  // Featured products (first 8, fills 4-col grid with 2 rows)
+  const featuredProducts = products?.slice(0, 8) || [];
 
   // Filter Tabaski Packs
   const tabaskiCategory = categories?.find((c) => c.slug === "packs-tabaski");
@@ -245,51 +245,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── FEATURED PRODUCTS (visible first!) ─── */}
-      <section className="py-3 sm:py-4">
-        <div className="container">
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900">Produits Vedettes</h2>
-            <Link href="/produits">
-              <span className="text-[10px] sm:text-xs text-[#1E5A8E] hover:underline font-bold flex items-center gap-0.5">
-                Voir plus <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-              </span>
-            </Link>
-          </div>
-
-          {productsLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg animate-pulse border">
-                  <div className="aspect-square bg-gray-200 rounded-t-lg" />
-                  <div className="p-2 space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-full" />
-                    <div className="h-3 bg-gray-200 rounded w-2/3" />
-                    <div className="h-7 bg-gray-200 rounded w-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-              {featuredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  unit={product.unit}
-                  imageUrl={product.imageUrl}
-                  badge={product.badge}
-                  inStock={product.inStock}
-                  compact
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* ─── VENTES FLASH TABASKI (brand colors) ─── */}
       {tabaskiProducts.length > 0 && (
         <section className="py-3 sm:py-4 bg-gradient-to-b from-white to-gray-50 border-t border-b">
@@ -392,6 +347,51 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* ─── FEATURED PRODUCTS ─── */}
+      <section className="py-3 sm:py-4 bg-white border-t border-gray-100">
+        <div className="container">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900">⭐ Produits en Vedette</h2>
+            <Link href="/produits">
+              <span className="text-[10px] sm:text-xs text-[#1E5A8E] hover:underline font-bold flex items-center gap-0.5">
+                Voir plus <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </span>
+            </Link>
+          </div>
+
+          {productsLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg animate-pulse border">
+                  <div className="aspect-square bg-gray-200 rounded-t-lg" />
+                  <div className="p-2 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-full" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    <div className="h-7 bg-gray-200 rounded w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  unit={product.unit}
+                  imageUrl={product.imageUrl}
+                  badge={product.badge}
+                  inStock={product.inStock}
+                  compact
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* ─── PRODUCTS BY CATEGORY ─── */}
       {productsByCategory

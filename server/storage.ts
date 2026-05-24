@@ -69,3 +69,12 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
 
   return { key, url: `/uploads/${key}` };
 }
+
+// Convert legacy /uploads/xxx paths stored in DB to full Supabase Storage URLs.
+export function resolveImageUrl(raw: string | null | undefined): string | null | undefined {
+  if (!raw || !raw.startsWith("/uploads/")) return raw;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) return raw;
+  const key = raw.replace(/^\/uploads\//, "");
+  return `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${key}`;
+}
