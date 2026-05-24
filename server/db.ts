@@ -14,7 +14,7 @@ export async function getDb() {
     }
     try {
       const url = process.env.DATABASE_URL;
-      const isSupabase = url.includes("supabase.co");
+      const isSupabase = url.includes("supabase.co") || url.includes("supabase.com");
       
       queryClient = postgres(url, {
         ssl: isSupabase ? "require" : false,
