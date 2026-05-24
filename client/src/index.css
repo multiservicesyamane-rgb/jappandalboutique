@@ -245,145 +245,182 @@ body {
 }
 
 
-/* ===== EFFETS PREMIUM ===== */
+/* ===== EFFETS PREMIUM & NÉON ===== */
 
-/* Ombres élégantes */
-.shadow-premium {
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+/* Card hover glow — utilisé sur ProductCard et Tabaski cards */
+.card-hover-glow {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover-glow:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 0 0 1px rgba(168, 210, 78, 0.3),
+    0 8px 32px rgba(30, 90, 142, 0.18),
+    0 0 20px rgba(168, 210, 78, 0.12);
 }
 
-.shadow-premium-lg {
-  box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+/* Header gradient animé */
+@keyframes header-shimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.header-gradient {
+  background: linear-gradient(135deg, #1E5A8E 0%, #164a73 30%, #0D3B0D 60%, #1a5c8f 100%);
+  background-size: 300% 300%;
+  animation: header-shimmer 10s ease infinite;
 }
 
-.shadow-premium-xl {
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+/* Prix avec lueur */
+.price-neon {
+  color: #1E5A8E;
+  text-shadow: 0 0 8px rgba(30, 90, 142, 0.35);
 }
 
-/* Effets néon */
+/* Badge Vente Flash */
+@keyframes badge-flash-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 60, 0, 0.7), 0 0 12px rgba(255, 0, 100, 0.3); }
+  50%       { box-shadow: 0 0 14px rgba(255, 60, 0, 0.9), 0 0 28px rgba(255, 0, 100, 0.5); }
+}
+.badge-flash {
+  background: linear-gradient(135deg, #FF4500, #E8002D);
+  box-shadow: 0 0 8px rgba(255, 69, 0, 0.6), 0 0 16px rgba(232, 0, 45, 0.3);
+  animation: badge-flash-pulse 1.8s ease-in-out infinite;
+}
+
+/* Néon vert (badge produit, bouton ajouté) */
 .neon-green {
-  box-shadow: 
-    0 0 5px rgba(168, 210, 78, 0.5),
-    0 0 10px rgba(168, 210, 78, 0.3),
-    0 0 15px rgba(168, 210, 78, 0.2);
+  box-shadow:
+    0 0 5px rgba(168, 210, 78, 0.6),
+    0 0 12px rgba(168, 210, 78, 0.35),
+    0 0 20px rgba(168, 210, 78, 0.18);
 }
-
 .neon-green-hover:hover {
-  box-shadow: 
-    0 0 10px rgba(168, 210, 78, 0.6),
-    0 0 20px rgba(168, 210, 78, 0.4),
-    0 0 30px rgba(168, 210, 78, 0.3);
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+  box-shadow:
+    0 0 10px rgba(168, 210, 78, 0.7),
+    0 0 22px rgba(168, 210, 78, 0.45),
+    0 0 35px rgba(168, 210, 78, 0.25);
+  transform: translateY(-1px);
+  transition: all 0.25s ease;
 }
 
+/* Néon bleu */
 .neon-blue {
-  box-shadow: 
-    0 0 5px rgba(30, 90, 142, 0.5),
-    0 0 10px rgba(30, 90, 142, 0.3),
-    0 0 15px rgba(30, 90, 142, 0.2);
+  box-shadow:
+    0 0 5px rgba(30, 90, 142, 0.6),
+    0 0 12px rgba(30, 90, 142, 0.35),
+    0 0 20px rgba(30, 90, 142, 0.18);
 }
-
 .neon-blue-hover:hover {
-  box-shadow: 
-    0 0 10px rgba(30, 90, 142, 0.6),
-    0 0 20px rgba(30, 90, 142, 0.4),
-    0 0 30px rgba(30, 90, 142, 0.3);
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+  box-shadow:
+    0 0 10px rgba(30, 90, 142, 0.7),
+    0 0 22px rgba(30, 90, 142, 0.45),
+    0 0 35px rgba(30, 90, 142, 0.25);
+  transform: translateY(-1px);
+  transition: all 0.25s ease;
 }
 
-/* Contours lumineux (glow) */
+/* Badge panier animé */
+@keyframes cart-badge-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(168, 210, 78, 0.9); }
+  50%       { box-shadow: 0 0 10px rgba(168, 210, 78, 1), 0 0 22px rgba(168, 210, 78, 0.55); }
+}
+.cart-badge-neon {
+  animation: cart-badge-glow 2s ease-in-out infinite;
+}
+
+/* Glow WhatsApp */
+.whatsapp-neon {
+  box-shadow: 0 0 12px rgba(37, 211, 102, 0.55), 0 4px 18px rgba(37, 211, 102, 0.3);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.whatsapp-neon:hover {
+  box-shadow: 0 0 22px rgba(37, 211, 102, 0.8), 0 4px 28px rgba(37, 211, 102, 0.5);
+  transform: scale(1.07);
+}
+
+/* Contours lumineux */
 .glow-border-green {
-  border: 2px solid rgba(168, 210, 78, 0.5);
-  box-shadow: 
-    inset 0 0 10px rgba(168, 210, 78, 0.2),
-    0 0 10px rgba(168, 210, 78, 0.3);
+  border: 1.5px solid rgba(168, 210, 78, 0.55);
+  box-shadow: inset 0 0 10px rgba(168, 210, 78, 0.15), 0 0 12px rgba(168, 210, 78, 0.3);
 }
-
 .glow-border-blue {
-  border: 2px solid rgba(30, 90, 142, 0.5);
-  box-shadow: 
-    inset 0 0 10px rgba(30, 90, 142, 0.2),
-    0 0 10px rgba(30, 90, 142, 0.3);
+  border: 1.5px solid rgba(30, 90, 142, 0.55);
+  box-shadow: inset 0 0 10px rgba(30, 90, 142, 0.15), 0 0 12px rgba(30, 90, 142, 0.3);
 }
 
 /* Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
-
 .glass-dark {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Animations subtiles */
+/* Float animation */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 }
+.animate-float { animation: float 3s ease-in-out infinite; }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
+/* Pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(168, 210, 78, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(168, 210, 78, 0.8); }
+  0%, 100% { box-shadow: 0 0 6px rgba(168, 210, 78, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(168, 210, 78, 0.9), 0 0 40px rgba(168, 210, 78, 0.45); }
 }
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 
 /* Gradient premium */
 .gradient-premium {
   background: linear-gradient(135deg, #1E5A8E 0%, #0D3B0D 50%, #A8D24E 100%);
 }
 
-.gradient-premium-hover:hover {
-  background: linear-gradient(135deg, #2E6A9E 0%, #2B6E30 50%, #B8DC4A 100%);
-  transition: all 0.3s ease;
-}
-
-/* Texte avec effet néon */
+/* Texte néon vert */
 .text-neon-green {
   color: #A8D24E;
-  text-shadow: 
-    0 0 5px rgba(168, 210, 78, 0.5),
-    0 0 10px rgba(168, 210, 78, 0.3);
+  text-shadow: 0 0 6px rgba(168, 210, 78, 0.6), 0 0 14px rgba(168, 210, 78, 0.35);
 }
-
+/* Texte néon bleu */
 .text-neon-blue {
-  color: #1E5A8E;
-  text-shadow: 
-    0 0 5px rgba(30, 90, 142, 0.5),
-    0 0 10px rgba(30, 90, 142, 0.3);
+  color: #4A9FE0;
+  text-shadow: 0 0 6px rgba(74, 159, 224, 0.6), 0 0 14px rgba(74, 159, 224, 0.35);
 }
 
-/* Hover lift effect */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
+/* Hover lift générique */
+.hover-lift { transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
 .hover-lift:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.15),
-    0 10px 10px -5px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 26px -5px rgba(0,0,0,0.14), 0 10px 10px -5px rgba(0,0,0,0.07);
+}
+
+/* Ombres élégantes */
+.shadow-premium    { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.09), 0 2px 4px -1px rgba(0,0,0,0.05); }
+.shadow-premium-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.09), 0 4px 6px -2px rgba(0,0,0,0.05); }
+.shadow-premium-xl { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.10), 0 10px 10px -5px rgba(0,0,0,0.04); }
+
+/* Orbe lumineux (hero section) */
+.glow-orb {
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Section title néon */
+.section-title-neon {
+  text-shadow: 0 0 10px rgba(168,210,78,0.4), 0 0 24px rgba(30,90,142,0.2);
+}
+
+/* Separator néon */
+.neon-separator {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #A8D24E, #1E5A8E, transparent);
+  box-shadow: 0 0 8px rgba(168,210,78,0.5);
 }

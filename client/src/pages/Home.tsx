@@ -3,7 +3,6 @@ import { Link, useLocation } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
-import { AdBanner } from "@/components/AdBanner";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { playNotificationSound } from "@/lib/playNotificationSound";
@@ -150,21 +149,32 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      {/* ─── MINI HERO BANNER ─── */}
-      <section className="bg-gradient-to-r from-[#1E5A8E] via-[#164a73] to-[#0D3B0D] text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,210,78,0.12),transparent_50%)]" />
-        <div className="container py-3 sm:py-4 md:py-6 relative z-10">
+      {/* ─── HERO BANNER ─── */}
+      <section className="header-gradient text-white relative overflow-hidden">
+        {/* Orbes neon de fond */}
+        <div className="absolute -top-10 right-10 w-56 h-56 glow-orb bg-[#A8D24E] opacity-20 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 glow-orb bg-[#1E5A8E] opacity-25 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 glow-orb bg-[#25D366] opacity-15 pointer-events-none" />
+
+        <div className="container py-4 sm:py-5 md:py-8 relative z-10">
           <div className="flex items-center gap-3 md:gap-6">
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm sm:text-base md:text-xl lg:text-2xl font-extrabold leading-snug">
-                {settings.shopName} — <span className="text-[#A8D24E]">Dakar</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="badge-flash text-white text-[9px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-0.5">
+                  <Zap className="h-2.5 w-2.5" /> LIVE
+                </span>
+                <span className="text-[#A8D24E] text-[9px] sm:text-[10px] font-bold opacity-90">Livraison 24h · Dakar</span>
+              </div>
+              <h1 className="text-sm sm:text-base md:text-2xl lg:text-3xl font-extrabold leading-snug section-title-neon">
+                {settings.shopName}{" "}
+                <span className="text-neon-green">— Dakar</span>
               </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm opacity-80 mt-0.5 line-clamp-1">
+              <p className="text-[10px] sm:text-xs md:text-sm opacity-75 mt-0.5 line-clamp-1">
                 {settings.shopSlogan || "Produits frais, packs festifs & livraison express"}
               </p>
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2.5">
                 <Link href="/produits">
-                  <span className="inline-flex items-center gap-1.5 bg-[#A8D24E] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow active:scale-95 cursor-pointer">
+                  <span className="inline-flex items-center gap-1.5 bg-[#A8D24E] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg active:scale-95 cursor-pointer neon-green">
                     <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     Voir le catalogue
                   </span>
@@ -173,18 +183,22 @@ export default function Home() {
                   href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg active:scale-95 whatsapp-neon"
                 >
                   <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   WhatsApp
                 </a>
               </div>
             </div>
-            <img
-              src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
-              alt={settings.shopName}
-              className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-full border-2 border-white/30 object-cover flex-shrink-0 shadow-lg"
-            />
+            <div className="flex-shrink-0 relative">
+              <div className="absolute inset-0 rounded-full animate-pulse-glow" />
+              <img
+                src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
+                alt={settings.shopName}
+                className="relative h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full border-2 border-[#A8D24E]/50 object-cover shadow-xl"
+                style={{ boxShadow: "0 0 20px rgba(168,210,78,0.4), 0 0 40px rgba(30,90,142,0.2)" }}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -246,23 +260,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── VENTES FLASH TABASKI (brand colors) ─── */}
+      {/* ─── VENTES FLASH TABASKI ─── */}
       {tabaskiProducts.length > 0 && (
         <section className="py-3 sm:py-4 bg-gradient-to-b from-white to-gray-50 border-t border-b">
           <div className="container">
-            {/* Header: one line, brand colors */}
-            <div className="bg-gradient-to-r from-[#1E5A8E] via-[#0D3B0D] to-[#1E5A8E] rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2 mb-3 shadow-md">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <span className="bg-[#A8D24E] text-white text-[8px] sm:text-[9px] font-black uppercase px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-0.5 flex-shrink-0 animate-pulse">
-                  <Zap className="h-2.5 w-2.5" /> OFFRES
+            {/* Header Tabaski avec neon */}
+            <div
+              className="rounded-xl px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2 mb-3 relative overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, #0a1628 0%, #0D3B0D 50%, #0a1628 100%)",
+                boxShadow: "0 0 20px rgba(168,210,78,0.2), 0 0 40px rgba(30,90,142,0.15), inset 0 1px 0 rgba(168,210,78,0.2)",
+                border: "1px solid rgba(168,210,78,0.25)",
+              }}
+            >
+              {/* Glow de fond */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(168,210,78,0.08),transparent_70%)] pointer-events-none" />
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 relative z-10">
+                <span className="badge-flash text-white text-[8px] sm:text-[9px] font-black uppercase px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-0.5 flex-shrink-0">
+                  <Zap className="h-2.5 w-2.5" /> FLASH
                 </span>
-                <span className="text-white font-black text-xs sm:text-sm md:text-base truncate">
+                <span className="text-white font-black text-xs sm:text-sm md:text-base truncate text-neon-green" style={{ textShadow: "0 0 10px rgba(168,210,78,0.5)" }}>
                   🐏 Ventes Flash Tabaski
                 </span>
               </div>
-              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-                {/* Compact countdown */}
-                <div className="flex items-center gap-0.5 bg-black/25 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
+              <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 relative z-10">
+                {/* Countdown neon */}
+                <div
+                  className="flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md"
+                  style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(168,210,78,0.3)" }}
+                >
                   {[
                     { v: timeLeft.days, l: "J" },
                     { v: timeLeft.hours, l: "H" },
@@ -270,13 +296,13 @@ export default function Home() {
                     { v: timeLeft.seconds, l: "S" },
                   ].map((t, i) => (
                     <span key={i} className="flex items-center">
-                      <span className="text-white font-bold text-[9px] sm:text-[10px] tabular-nums">{t.v.toString().padStart(2, "0")}</span>
-                      <span className="text-[#A8D24E] font-bold text-[8px] sm:text-[9px] mr-0.5">{t.l}</span>
+                      <span className="text-white font-black text-[9px] sm:text-[10px] tabular-nums" style={{ textShadow: "0 0 6px rgba(255,255,255,0.5)" }}>{t.v.toString().padStart(2, "0")}</span>
+                      <span className="font-bold text-[8px] sm:text-[9px] mr-0.5 text-neon-green">{t.l}</span>
                     </span>
                   ))}
                 </div>
                 <Link href="/categories/packs-tabaski">
-                  <span className="bg-[#A8D24E] hover:bg-[#92ba3d] text-white font-bold text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full active:scale-95 cursor-pointer whitespace-nowrap">
+                  <span className="bg-[#A8D24E] hover:bg-[#97c43d] text-white font-black text-[9px] sm:text-[10px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-full active:scale-95 cursor-pointer whitespace-nowrap neon-green">
                     Tout voir
                   </span>
                 </Link>
@@ -295,7 +321,7 @@ export default function Home() {
                   <div
                     key={product.id}
                     onClick={() => navigate(`/produits/${product.id}`)}
-                    className="cursor-pointer flex-shrink-0 w-[42vw] sm:w-[35vw] md:w-[220px] bg-white rounded-lg sm:rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group relative"
+                    className="cursor-pointer flex-shrink-0 w-[42vw] sm:w-[35vw] md:w-[220px] bg-white rounded-lg sm:rounded-xl border border-gray-100 overflow-hidden card-hover-glow flex flex-col group relative"
                   >
                     {/* Discount Badge */}
                     <div className="absolute top-1.5 right-1.5 z-10 bg-red-500 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">
@@ -463,15 +489,18 @@ export default function Home() {
 
       <Footer />
 
-      {/* Floating WhatsApp button - mobile only */}
+      {/* Bouton WhatsApp flottant — mobile */}
       <a
         href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}?text=${encodeURIComponent("Bonjour Jappandal Boutique, je souhaite des informations sur vos produits.")}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-4 z-40 md:hidden"
       >
-        <div className="w-12 h-12 rounded-full bg-[#25D366] shadow-lg flex items-center justify-center hover:bg-[#20BA5A] transition-colors animate-bounce">
-          <MessageCircle className="h-6 w-6 text-white" />
+        <div
+          className="w-14 h-14 rounded-full bg-[#25D366] flex items-center justify-center whatsapp-neon"
+          style={{ animation: "cart-badge-glow 2.5s ease-in-out infinite, float 3s ease-in-out infinite" }}
+        >
+          <MessageCircle className="h-7 w-7 text-white" />
         </div>
       </a>
     </div>
