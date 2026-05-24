@@ -26,6 +26,7 @@ import AdminAdBanners from "./pages/admin/AdBanners";
 import AdminLogin from "./pages/admin/Login";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
+import Launch from "./pages/Launch";
 
 function Router() {
   return (
@@ -40,8 +41,12 @@ function Router() {
       <Route path="/paiement-succes" component={PaymentSuccess} />
       <Route path="/paiement-annule" component={PaymentCancel} />
       
-      {/* Admin Login (URL secrète) */}
+      {/* Page de lancement officiel */}
+      <Route path="/lancement" component={Launch} />
+
+      {/* Admin Login */}
       <Route path="/yamanetech/login" component={AdminLogin} />
+      <Route path="/admin/login" component={AdminLogin} />
 
       {/* Admin Routes */}
       <Route path="/admin" component={AdminDashboard} />

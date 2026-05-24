@@ -2,78 +2,55 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { deliveryZones } from "@/lib/deliveryZones";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Minus,
-  Plus,
-  Trash2,
-  ShoppingBag,
-  ArrowLeft,
-  MessageCircle,
-  CheckCircle2,
-  ChevronRight,
-  Banknote,
+  Minus, Plus, Trash2, ShoppingBag, ArrowLeft,
+  MessageCircle, User, Phone, MapPin, ChevronDown,
 } from "lucide-react";
 
 export default function Cart() {
-  const {
-    items,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    totalItems,
-    totalPrice,
-    getWhatsAppCheckoutUrl,
-  } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCart();
   const settings = useSettings();
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<"cash_on_delivery" | null>(null);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const paymentMethods = [
-    {
-      id: "cash_on_delivery" as const,
-      name: "Paiement à la livraison",
-      description: "Payez en espèces à la réception de votre commande",
-      icon: Banknote,
-      color: "bg-green-500",
-      textColor: "text-green-600",
-      borderColor: "border-green-500",
-    },
-  ];
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [zoneId, setZoneId] = useState("");
 
-  const handlePayment = () => {
-    if (!selectedPayment) {
-      alert("Veuillez sélectionner un mode de paiement");
-      return;
-    }
+  const selectedZone = deliveryZones.find((z) => z.id === zoneId);
+  const deliveryFee = selectedZone?.price ?? 0;
+  const grandTotal = totalPrice + deliveryFee;
 
-    if (!acceptedTerms) {
-      alert("⚠️ Veuillez accepter les conditions de paiement à la livraison");
-      return;
-    }
+  const groups = Array.from(new Set(deliveryZones.map((z) => z.group)));
 
-    // Paiement à la livraison: envoyer la commande par WhatsApp
-    const message = `🛒 *Nouvelle Commande*\n\n${items
-      .map((item) => `• ${item.name} x${item.quantity} - ${parseFloat(item.price).toLocaleString()} FCFA`)
-      .join("\n")}\n\n💰 *Total:* ${totalPrice.toLocaleString()} FCFA\n\n💵 *Mode de paiement:* Paiement à la livraison\n\nMerci de me confirmer la disponibilité et les frais de livraison selon ma zone.`;
-    
-    const phone = settings.phone1.replace(/[^0-9]/g, "");
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-    setPaymentDialogOpen(false);
-    setSelectedPayment(null);
-    setAcceptedTerms(false);
+  const handleOrder = () => {
+    if (!name.trim()) { alert("Veuillez entrer votre nom"); return; }
+    if (!phone.trim()) { alert("Veuillez entrer votre numéro de téléphone"); return; }
+    if (!zoneId) { alert("Veuillez choisir votre zone de livraison"); return; }
+
+    const itemLines = items
+      .map((i) => `• ${i.name} ×${i.quantity} = ${(parseFloat(i.price) * i.quantity).toLocaleString("fr-FR")} FCFA`)
+      .join("\n");
+
+    const msg = [
+      "🛒 *NOUVELLE COMMANDE — Jappandal Boutique*",
+      "",
+      itemLines,
+      "",
+      `📦 *Sous-total :* ${totalPrice.toLocaleString("fr-FR")} FCFA`,
+      `🚚 *Livraison (${selectedZone?.name}) :* ${deliveryFee.toLocaleString("fr-FR")} FCFA`,
+      `💰 *TOTAL :* ${grandTotal.toLocaleString("fr-FR")} FCFA`,
+      "",
+      `👤 *Nom :* ${name}`,
+      `📞 *Téléphone :* ${phone}`,
+      `📍 *Zone :* ${selectedZone?.name}`,
+      "",
+      "Merci de confirmer la disponibilité et l'heure de livraison. 🙏",
+    ].join("\n");
+
+    const phoneNum = settings.phone1.replace(/[^0-9]/g, "");
+    window.open(`https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   if (items.length === 0) {
@@ -85,22 +62,14 @@ export default function Cart() {
             <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="h-12 w-12 text-gray-300" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-3">
-              Votre panier est vide
-            </h1>
-            <p className="text-gray-500 mb-8">
-              Parcourez nos produits et ajoutez vos articles préférés au panier
-            </p>
-            <Button
-              size="lg"
-              className="bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white"
-              asChild
-            >
-              <Link href="/produits">
-                <ShoppingBag className="h-5 w-5 mr-2" />
+            <h1 className="text-2xl font-bold text-gray-800 mb-3">Votre panier est vide</h1>
+            <p className="text-gray-500 mb-8">Parcourez nos produits et ajoutez vos articles préférés</p>
+            <Link href="/produits">
+              <span className="inline-flex items-center gap-2 bg-[#1E5A8E] text-white font-bold px-6 py-3 rounded-full cursor-pointer hover:bg-[#0D3B0D] transition-colors">
+                <ShoppingBag className="h-5 w-5" />
                 Découvrir nos produits
-              </Link>
-            </Button>
+              </span>
+            </Link>
           </div>
         </main>
         <Footer />
@@ -112,9 +81,8 @@ export default function Cart() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      <main className="flex-1 pb-32 lg:pb-8">
-        <div className="container py-4 md:py-6">
-          {/* Back button */}
+      <main className="flex-1 pb-6">
+        <div className="container py-4 md:py-6 max-w-3xl mx-auto">
           <Link href="/produits">
             <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#1E5A8E] mb-4 transition-colors">
               <ArrowLeft className="h-4 w-4" />
@@ -122,290 +90,180 @@ export default function Cart() {
             </button>
           </Link>
 
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">
-            Mon Panier
-          </h1>
-          <p className="text-sm text-gray-500 mb-6">
-            {totalItems} article{totalItems > 1 ? "s" : ""} dans votre panier
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">Mon Panier</h1>
+          <p className="text-sm text-gray-500 mb-5">
+            {totalItems} article{totalItems > 1 ? "s" : ""}
           </p>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-3">
-              {items.map((item) => {
-                const itemTotal = parseFloat(item.price) * item.quantity;
-                return (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 p-3 bg-white rounded-xl border shadow-sm"
-                  >
-                    {/* Image */}
-                    <Link href={`/produits/${item.id}`}>
-                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-3xl">
-                            🛒
-                          </div>
-                        )}
+          {/* ── Cart Items ── */}
+          <div className="space-y-3 mb-6">
+            {items.map((item) => {
+              const itemTotal = parseFloat(item.price) * item.quantity;
+              return (
+                <div key={item.id} className="flex gap-3 p-3 bg-white rounded-xl border shadow-sm">
+                  <Link href={`/produits/${item.id}`}>
+                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 w-[72px] h-[72px]">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-2xl">🛒</div>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm line-clamp-2 text-gray-800">{item.name}</h3>
+                    <p className="text-[#1E5A8E] font-bold text-sm mt-0.5">
+                      {parseFloat(item.price).toLocaleString("fr-FR")} FCFA
+                      {item.unit && <span className="text-gray-400 font-normal text-xs">/{item.unit}</span>}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="text-sm font-bold w-8 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
                       </div>
-                    </Link>
-
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/produits/${item.id}`}>
-                        <h3 className="font-semibold text-sm line-clamp-2 text-gray-800 hover:text-[#1E5A8E] transition-colors">
-                          {item.name}
-                        </h3>
-                      </Link>
-                      <p className="text-[#1E5A8E] font-bold text-sm mt-1">
-                        {parseFloat(item.price).toLocaleString("fr-FR")} FCFA
-                        {item.unit ? (
-                          <span className="text-gray-400 font-normal text-xs">
-                            /{item.unit}
-                          </span>
-                        ) : null}
-                      </p>
-
-                      {/* Quantity controls */}
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
-                            }
-                            className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="text-sm font-semibold w-8 text-center">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                            className="w-7 h-7 rounded-full border flex items-center justify-center hover:bg-gray-100 transition-colors"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-gray-800">
-                            {itemTotal.toLocaleString("fr-FR")} F
-                          </span>
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="text-red-400 hover:text-red-600 transition-colors p-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-gray-800">
+                          {itemTotal.toLocaleString("fr-FR")} F
+                        </span>
+                        <button onClick={() => removeItem(item.id)} className="text-red-400 hover:text-red-600 p-1">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
 
-              {/* Clear cart */}
-              <div className="flex justify-end">
-                <button
-                  onClick={clearCart}
-                  className="text-sm text-red-500 hover:text-red-700 transition-colors flex items-center gap-1"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Vider le panier
-                </button>
-              </div>
+            <div className="flex justify-end">
+              <button onClick={clearCart} className="text-xs text-red-400 hover:text-red-600 flex items-center gap-1">
+                <Trash2 className="h-3.5 w-3.5" /> Vider le panier
+              </button>
+            </div>
+          </div>
+
+          {/* ── Finaliser la commande ── */}
+          <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] px-5 py-4">
+              <h2 className="text-white font-bold text-base flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                Finaliser la commande
+              </h2>
+              <p className="text-white/70 text-xs mt-0.5">Commandez facilement via WhatsApp</p>
             </div>
 
-            {/* Summary & Checkout */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl border shadow-sm p-4 md:p-6 sticky top-4">
-                <h2 className="font-bold text-lg mb-4">Récapitulatif</h2>
-
-                <div className="space-y-2 mb-4 pb-4 border-b">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Sous-total</span>
-                    <span className="font-semibold">
-                      {totalPrice.toLocaleString("fr-FR")} FCFA
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Livraison</span>
-                    <span className="text-gray-600">
-                      À confirmer
-                    </span>
-                  </div>
+            <div className="p-5 space-y-4">
+              {/* Récap total */}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Sous-total</span>
+                  <span className="font-semibold">{totalPrice.toLocaleString("fr-FR")} FCFA</span>
                 </div>
-
-                <div className="flex justify-between mb-6">
-                  <span className="font-bold text-lg">Total</span>
-                  <span className="font-bold text-lg text-[#1E5A8E]">
-                    {totalPrice.toLocaleString("fr-FR")} FCFA
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Livraison</span>
+                  <span className={selectedZone ? "font-semibold text-[#1E5A8E]" : "text-gray-400"}>
+                    {selectedZone ? `${deliveryFee.toLocaleString("fr-FR")} FCFA` : "Choisir zone →"}
                   </span>
                 </div>
-
-                <Button
-                  onClick={() => setPaymentDialogOpen(true)}
-                  className="w-full bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white h-12 text-base"
-                  size="lg"
-                >
-                  <CheckCircle2 className="h-5 w-5 mr-2" />
-                  Procéder au paiement
-                </Button>
-
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  Les frais de livraison seront confirmés par WhatsApp
-                </p>
+                {selectedZone && (
+                  <div className="flex justify-between pt-2 border-t font-bold">
+                    <span>Total</span>
+                    <span className="text-[#1E5A8E] text-lg">{grandTotal.toLocaleString("fr-FR")} FCFA</span>
+                  </div>
+                )}
               </div>
+
+              {/* Nom */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                  <User className="h-4 w-4 text-[#1E5A8E]" /> Votre nom complet
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ex: Mamadou Diallo"
+                  className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5A8E]/40 focus:border-[#1E5A8E]"
+                />
+              </div>
+
+              {/* Téléphone */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                  <Phone className="h-4 w-4 text-[#1E5A8E]" /> Numéro de téléphone
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Ex: 77 123 45 67"
+                  className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5A8E]/40 focus:border-[#1E5A8E]"
+                />
+              </div>
+
+              {/* Zone de livraison */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
+                  <MapPin className="h-4 w-4 text-[#1E5A8E]" /> Zone de livraison
+                </label>
+                <div className="relative">
+                  <select
+                    value={zoneId}
+                    onChange={(e) => setZoneId(e.target.value)}
+                    className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5A8E]/40 focus:border-[#1E5A8E] appearance-none bg-white"
+                  >
+                    <option value="">-- Choisir votre quartier --</option>
+                    {groups.map((group) => (
+                      <optgroup key={group} label={group}>
+                        {deliveryZones
+                          .filter((z) => z.group === group)
+                          .map((z) => (
+                            <option key={z.id} value={z.id}>
+                              {z.name} — {z.price.toLocaleString("fr-FR")} FCFA
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+                {selectedZone && (
+                  <p className="text-xs text-[#1E5A8E] mt-1 font-medium">
+                    ✅ Livraison {selectedZone.group.split(":")[0]} : {deliveryFee.toLocaleString("fr-FR")} FCFA
+                  </p>
+                )}
+              </div>
+
+              {/* Bouton commander */}
+              <button
+                onClick={handleOrder}
+                className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] active:scale-95 text-white font-bold py-4 rounded-xl text-base transition-all shadow-md"
+              >
+                <MessageCircle className="h-5 w-5" />
+                Commander sur WhatsApp
+              </button>
+
+              <p className="text-center text-xs text-gray-400">
+                Paiement à la livraison · Livraison sous 24h à Dakar
+              </p>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Fixed WhatsApp Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 lg:hidden z-50">
-        <Button
-          onClick={() => window.open(getWhatsAppCheckoutUrl(), "_blank")}
-          className="w-full bg-[#25D366] hover:bg-[#1DA851] text-white h-12 text-base"
-        >
-          <MessageCircle className="h-5 w-5 mr-2" />
-          Commander sur WhatsApp
-        </Button>
-      </div>
-
       <Footer />
-
-      {/* Payment Method Dialog - Simplifié */}
-      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl">
-              Finaliser votre commande
-            </DialogTitle>
-            <DialogDescription>
-              Choisissez votre mode de paiement
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 mt-4">
-            {/* Order Summary */}
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Sous-total</span>
-                <span className="font-semibold">
-                  {totalPrice.toLocaleString("fr-FR")} FCFA
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Livraison</span>
-                <span className="text-gray-600">
-                  À confirmer sur WhatsApp
-                </span>
-              </div>
-              <div className="flex justify-between pt-2 border-t">
-                <span className="font-bold">Total estimé</span>
-                <span className="font-bold text-[#1E5A8E]">
-                  {totalPrice.toLocaleString("fr-FR")} FCFA
-                </span>
-              </div>
-            </div>
-
-            {/* Payment Methods */}
-            <div>
-              <label className="text-sm font-semibold mb-3 block">
-                Mode de paiement
-              </label>
-              <div className="space-y-3">
-                {paymentMethods.map((method) => {
-                  const Icon = method.icon;
-                  const isSelected = selectedPayment === method.id;
-
-                  return (
-                    <button
-                      key={method.id}
-                      onClick={() => setSelectedPayment(method.id)}
-                      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                        isSelected
-                          ? `${method.borderColor} bg-opacity-5`
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-12 h-12 rounded-lg ${method.color} bg-opacity-10 flex items-center justify-center flex-shrink-0`}
-                        >
-                          <Icon className={`h-6 w-6 ${method.textColor}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm">{method.name}</h3>
-                          <p className="text-xs text-gray-500 line-clamp-2">
-                            {method.description}
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <CheckCircle2 className={`h-5 w-5 ${method.textColor}`} />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-xs text-blue-700">
-                  💡 <strong>Astuce :</strong> Après validation, vous serez redirigé vers WhatsApp pour confirmer votre commande et votre adresse de livraison. Nos frais de livraison varient selon votre zone à Dakar.
-                </p>
-              </div>
-
-              {/* Checkbox de confirmation */}
-              <div className="mt-4 flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <Checkbox
-                  id="accept-terms"
-                  checked={acceptedTerms}
-                  onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                  className="mt-0.5"
-                />
-                <label
-                  htmlFor="accept-terms"
-                  className="text-sm text-gray-700 cursor-pointer leading-relaxed"
-                >
-                  <strong>J'accepte le paiement à la livraison</strong> et je comprends que je devrai payer en espèces à la réception de ma commande.
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-6">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setPaymentDialogOpen(false);
-                setSelectedPayment(null);
-                setAcceptedTerms(false);
-              }}
-              className="flex-1"
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={handlePayment}
-              disabled={!selectedPayment || !acceptedTerms}
-              className="flex-1 bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white"
-            >
-              Confirmer
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
