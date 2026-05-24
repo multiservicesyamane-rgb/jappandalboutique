@@ -291,56 +291,55 @@ export default function Home() {
                 const isJustAdded = justAddedId === product.id;
 
                 return (
-                  <div
-                    key={product.id}
-                    className="flex-shrink-0 w-[42vw] sm:w-[35vw] md:w-[220px] bg-white rounded-lg sm:rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group relative"
-                  >
-                    {/* Discount Badge */}
-                    <div className="absolute top-1.5 right-1.5 z-10 bg-red-500 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">
-                      {discount}
-                    </div>
+                  <Link key={product.id} href={`/produits/${product.id}`} className="block flex-shrink-0 w-[42vw] sm:w-[35vw] md:w-[220px]">
+                    <div className="bg-white rounded-lg sm:rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group relative h-full">
+                      {/* Discount Badge */}
+                      <div className="absolute top-1.5 right-1.5 z-10 bg-red-500 text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">
+                        {discount}
+                      </div>
 
-                    {/* Image */}
-                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
-                      )}
-                    </div>
+                      {/* Image */}
+                      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>
+                        )}
+                      </div>
 
-                    {/* Info */}
-                    <div className="p-2 sm:p-2.5 flex-1 flex flex-col justify-between">
-                      <h3 className="text-[11px] sm:text-xs font-bold text-gray-900 line-clamp-2 mb-1.5 leading-tight">
-                        {product.name}
-                      </h3>
-                      <div>
-                        <div className="flex items-baseline gap-1 mb-1.5">
-                          <span className="text-xs sm:text-sm font-black text-[#1E5A8E]">{formattedPrice}</span>
-                          <span className="text-[8px] sm:text-[9px] text-gray-400">FCFA</span>
+                      {/* Info */}
+                      <div className="p-2 sm:p-2.5 flex-1 flex flex-col justify-between">
+                        <h3 className="text-[11px] sm:text-xs font-bold text-gray-900 line-clamp-2 mb-1.5 leading-tight">
+                          {product.name}
+                        </h3>
+                        <div>
+                          <div className="flex items-baseline gap-1 mb-1.5">
+                            <span className="text-xs sm:text-sm font-black text-[#1E5A8E]">{formattedPrice}</span>
+                            <span className="text-[8px] sm:text-[9px] text-gray-400">FCFA</span>
+                          </div>
+                          <span className="text-[9px] sm:text-[10px] text-gray-400 line-through block mb-1.5">{originalPrice} FCFA</span>
+                          <button
+                            onClick={(e) => handleAddPackToCart(e, product)}
+                            className={`w-full flex items-center justify-center gap-1 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
+                              isJustAdded
+                                ? "bg-[#0D3B0D] text-white"
+                                : "bg-[#A8D24E] hover:bg-[#92ba3d] text-white active:scale-95"
+                            }`}
+                          >
+                            {isJustAdded ? (
+                              <><Check className="h-3 w-3" /> Ajouté !</>
+                            ) : (
+                              <><ShoppingCart className="h-3 w-3" /> Ajouter</>
+                            )}
+                          </button>
                         </div>
-                        <span className="text-[9px] sm:text-[10px] text-gray-400 line-through block mb-1.5">{originalPrice} FCFA</span>
-                        <button
-                          onClick={(e) => handleAddPackToCart(e, product)}
-                          className={`w-full flex items-center justify-center gap-1 py-1.5 sm:py-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
-                            isJustAdded
-                              ? "bg-[#0D3B0D] text-white"
-                              : "bg-[#A8D24E] hover:bg-[#92ba3d] text-white active:scale-95"
-                          }`}
-                        >
-                          {isJustAdded ? (
-                            <><Check className="h-3 w-3" /> Ajouté !</>
-                          ) : (
-                            <><ShoppingCart className="h-3 w-3" /> Ajouter</>
-                          )}
-                        </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
