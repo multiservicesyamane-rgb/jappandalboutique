@@ -1,18 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "vite build",
-  "installCommand": "npm install --legacy-peer-deps",
-  "outputDirectory": "dist/public",
-  "framework": null,
-  "functions": {
-    "api/trpc/[trpc].ts": {
-      "maxDuration": 30
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
-  ]
+  "buildCommand": "node scripts/build-vercel.mjs",
+  "installCommand": "npm install --legacy-peer-deps"
 }
