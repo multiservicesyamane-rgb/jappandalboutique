@@ -46,6 +46,7 @@ execSync(
     '--target=node24',
     '--outfile=.vercel/output/functions/api/trpc/[trpc].func/index.js',
     '--log-level=info',
+    '--footer:js=module.exports=module.exports.default??module.exports;',
   ].join(' '),
   { stdio: 'inherit', cwd: ROOT }
 );
