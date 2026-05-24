@@ -1,12 +1,12 @@
 import "dotenv/config";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { nodeHTTPRequestHandler } from "@trpc/server/adapters/node-http";
-import { appRouter } from "../../server/routers";
+import { appRouter } from "./routers";
 import { parse as parseCookieHeader } from "cookie";
-import { verifySessionToken } from "../../server/_core/auth";
-import type { User } from "../../drizzle/schema";
-import { ENV } from "../../server/_core/env";
-import { getUserByOpenId } from "../../server/db";
+import { verifySessionToken } from "./_core/auth";
+import type { User } from "../drizzle/schema";
+import { ENV } from "./_core/env";
+import { getUserByOpenId } from "./db";
 
 async function resolveUser(req: VercelRequest): Promise<User | null> {
   const cookieHeader = req.headers.cookie || "";
@@ -38,8 +38,7 @@ async function resolveUser(req: VercelRequest): Promise<User | null> {
   return null;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Set CORS headers
+export async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -49,7 +48,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // In Vercel, the dynamic route parameter [trpc] is available in req.query.trpc
   const path = (req.query.trpc as string) || "";
 
   try {
@@ -71,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(500).json({
       error: "Vercel Handler Crash",
       message: error.message || String(error),
-      stack: error.stack
+      stack: error.stack,
     });
   }
 }

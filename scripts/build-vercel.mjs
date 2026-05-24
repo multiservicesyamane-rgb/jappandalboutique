@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { mkdirSync, cpSync, writeFileSync, rmSync, existsSync, renameSync } from 'node:fs';
+import { mkdirSync, cpSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,7 +39,7 @@ console.log('\n[4/5] Bundling API handler with esbuild...');
 execSync(
   [
     'npx esbuild',
-    'api/trpc/[trpc].ts',
+    'server/vercel-handler.ts',
     '--bundle',
     '--platform=node',
     '--format=cjs',
@@ -99,14 +99,6 @@ writeFileSync(
     crons: [],
   }, null, 2)
 );
-
-// Rename the TypeScript source so @vercel/node doesn't detect it and
-// overwrite the esbuild bundle in a second compilation pass.
-// (Only the build environment is affected — the git repo stays unchanged.)
-const tsSource = join(ROOT, 'api/trpc/[trpc].ts');
-if (existsSync(tsSource)) {
-  renameSync(tsSource, join(ROOT, 'api/trpc/_trpc.source.ts'));
-}
 
 console.log('\n✅ Vercel build complete!');
 console.log(`   Static: ${join(OUTPUT, 'static')}`);
