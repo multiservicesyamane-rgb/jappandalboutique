@@ -52,17 +52,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // In Vercel, the dynamic route parameter [trpc] is available in req.query.trpc
   const path = (req.query.trpc as string) || "";
 
-  return nodeHTTPRequestHandler({
-    router: appRouter,
-    req,
-    res,
-    path,
-    createContext: async () => {
-      const user = await resolveUser(req);
-      return { req, res, user } as any;
-    },
-    onError: ({ error, path }) => {
-      console.error(`[tRPC] Error on ${path}:`, error.message);
-    },
-  });
+  try {
+    await nodeHTTPRequestHandler({
+      router: appRouter,
+      req,
+      res,
+      path,
+      createContext: async () => {
+        const user = await resolveUser(req);
+        return { req, res, user } as any;
+      },
+      onError: ({ error, path }) => {
+        console.error(`[tRPC] Error on ${path}:`, error.message);
+      },
+    });
+  } catch (error: any) {
+    console.error("Vercel Handler Crash:", error);
+    res.status(500).json({
+      error: "Vercel Handler Crash",
+      message: error.message || String(error),
+      stack: error.stack
+    });
+  }
 }
