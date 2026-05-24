@@ -1,6 +1,33 @@
 import type { CookieOptions, Request } from "express";
+import type { ServerResponse } from "node:http";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+
+function buildSetCookieHeader(
+  name: string,
+  value: string,
+  opts: { httpOnly?: boolean; path?: string; sameSite?: string; secure?: boolean; maxAge?: number }
+): string {
+  let header = `${name}=${encodeURIComponent(value)}`;
+  if (opts.path) header += `; Path=${opts.path}`;
+  if (opts.maxAge !== undefined) header += `; Max-Age=${Math.floor(opts.maxAge / 1000)}`;
+  if (opts.httpOnly) header += "; HttpOnly";
+  if (opts.secure) header += "; Secure";
+  if (opts.sameSite) header += `; SameSite=${opts.sameSite}`;
+  return header;
+}
+
+export function setSessionCookie(res: ServerResponse, req: Request, name: string, token: string, maxAgeMs: number) {
+  const opts = getSessionCookieOptions(req);
+  const header = buildSetCookieHeader(name, token, { ...opts, sameSite: String(opts.sameSite ?? "lax"), maxAge: maxAgeMs });
+  res.setHeader("Set-Cookie", header);
+}
+
+export function clearSessionCookie(res: ServerResponse, req: Request, name: string) {
+  const opts = getSessionCookieOptions(req);
+  const header = buildSetCookieHeader(name, "", { ...opts, sameSite: String(opts.sameSite ?? "lax"), maxAge: 0 });
+  res.setHeader("Set-Cookie", header);
+}
 
 function isIpAddress(host: string) {
   // Basic IPv4 check and IPv6 presence detection.

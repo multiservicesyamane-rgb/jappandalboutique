@@ -1,5 +1,5 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "../shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
+import { setSessionCookie, clearSessionCookie } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -44,13 +44,11 @@ export const appRouter = router({
           // DB unavailable — continue, JWT auth doesn't require DB
         }
         const token = await createSessionToken(input.email, "Administrateur");
-        const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        setSessionCookie(ctx.res as any, ctx.req as any, COOKIE_NAME, token, ONE_YEAR_MS);
         return { success: true } as const;
       }),
     logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      clearSessionCookie(ctx.res as any, ctx.req as any, COOKIE_NAME);
       return { success: true } as const;
     }),
   }),
