@@ -3,7 +3,7 @@ echo ==========================================
 echo ENVOI DE TOUTES LES MISES A JOUR VERS VERCEL
 echo ==========================================
 git add .
-git commit -m "feat: Remplacement des icones WhatsApp par l'icone officiel"
+git commit -m "fix: corriger l'erreur de syntaxe dans la page d'accueil"
 git push
 echo ==========================================
 echo TERMINE ! Vercel est en train de se mettre a jour.
