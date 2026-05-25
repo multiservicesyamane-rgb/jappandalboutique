@@ -20,6 +20,9 @@ export default function Home() {
     items: products?.filter(p => p.categoryId === cat.id) || []
   })).filter(group => group.items.length > 0) || [];
 
+  // Tabaski special section
+  const tabaskiProducts = products?.filter(p => p.badge?.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("mouton") || p.name.toLowerCase().includes("pack") || p.name.toLowerCase().includes("grillade")) || [];
+
   // Ventes Flash / Produits en vedette
   const featuredProducts = products?.slice(0, 10) || [];
   // Auto-scroll categories
@@ -209,6 +212,41 @@ export default function Home() {
 
       {/* ─── BANNIÈRE PUB HAUT ─── */}
       <AdBanner position="homepage_top" className="container mt-2 mb-0" />
+
+      {/* ─── VENTES FLASH TABASKI ─── */}
+      {tabaskiProducts.length > 0 && (
+        <section className="py-6 sm:py-8 bg-gradient-to-b from-[#E9F3E5] to-white border-b">
+          <div className="container px-0 sm:px-4">
+            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-green-800 flex items-center gap-2">
+                <span className="text-xl">🐏</span>
+                Spécial Tabaski
+              </h2>
+              <Link href="/produits">
+                <span className="text-green-700 text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm">
+                  Voir les packs &gt;
+                </span>
+              </Link>
+            </div>
+            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+              {tabaskiProducts.map((product) => (
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    unit={product.unit}
+                    imageUrl={product.imageUrl}
+                    badge={product.badge}
+                    inStock={product.inStock}
+                    compact
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ─── PRODUITS EN VEDETTE (CAROUSEL) ─── */}
       {productsLoading ? (
