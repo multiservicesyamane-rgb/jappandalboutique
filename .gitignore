@@ -110,3 +110,11 @@ temp/
 .webdev/
 
 .vercel
+
+# Vercel API build output (compiled by build script, not source)
+api/server.js
+api/server.mjs
+api/server.cjs
+
+# Local env overrides
+.env.vercel.local
