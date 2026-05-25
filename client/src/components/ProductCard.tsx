@@ -44,9 +44,10 @@ export function ProductCard({
     <Link href={`/produits/${id}`} className="block h-full">
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden card-hover-glow group cursor-pointer h-full flex flex-col">
         {/* Image */}
-        <div className={`relative overflow-hidden bg-gradient-to-br from-[#F5E6D3] via-[#E8D4B4] to-[#CBA568] ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
-          {/* Subtle light effect overlaid */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent pointer-events-none"></div>
+        <div className={`relative overflow-hidden bg-gradient-to-br from-white via-white to-[#E9F3E5] ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
+          {/* Subtle light effect overlaid (green glowing aura) */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.8),transparent_60%)] pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(168,210,78,0.1),transparent_50%)] pointer-events-none"></div>
           
           {imageUrl ? (
             <img
@@ -57,7 +58,7 @@ export function ProductCard({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center relative z-10">
-              <span className="text-sm font-black text-[#6B4423]/80 uppercase tracking-wide leading-tight">
+              <span className="text-sm font-black text-[#1E5A8E]/60 uppercase tracking-wide leading-tight">
                 {name}
               </span>
             </div>
