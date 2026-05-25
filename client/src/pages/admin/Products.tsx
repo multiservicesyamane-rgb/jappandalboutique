@@ -33,6 +33,8 @@ import {
   X,
   Crop,
   AlertTriangle,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,8 +70,12 @@ export default function AdminProducts() {
   const [cropSlotIndex, setCropSlotIndex] = useState(0);
 
   const utils = trpc.useUtils();
-  const { data: products, isLoading } = trpc.products.list.useQuery();
+  const { data: products, isLoading } = trpc.products.listAdmin.useQuery();
   const { data: categories } = trpc.categories.list.useQuery();
+  const toggleActive = trpc.products.toggleActive.useMutation({
+    onSuccess: () => utils.products.listAdmin.invalidate(),
+    onError: (e) => toast.error(`Erreur: ${e.message}`),
+  });
   const createProduct = trpc.products.create.useMutation({
     onSuccess: () => {
       utils.products.list.invalidate();
@@ -99,6 +105,8 @@ export default function AdminProducts() {
     return products?.filter((p) => {
       if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (categoryFilter !== "all" && p.categoryId.toString() !== categoryFilter) return false;
+      if (stockFilter === "inactive") return p.inStock === -1;
+      if (p.inStock === -1) return false; // hide disabled from other filters
       if (stockFilter === "in_stock" && p.inStock === 0) return false;
       if (stockFilter === "out_of_stock" && p.inStock > 0) return false;
       if (stockFilter === "low_stock" && (p.inStock === 0 || p.inStock > 5)) return false;
@@ -106,6 +114,8 @@ export default function AdminProducts() {
     });
   }, [products, searchQuery, categoryFilter, stockFilter]);
 
+  const activeCount = products?.filter((p) => p.inStock !== -1).length || 0;
+  const inactiveCount = products?.filter((p) => p.inStock === -1).length || 0;
   const lowStockCount = products?.filter((p) => p.inStock > 0 && p.inStock <= 5).length || 0;
   const outOfStockCount = products?.filter((p) => p.inStock === 0).length || 0;
 
@@ -274,11 +284,24 @@ export default function AdminProducts() {
   return (
     <AdminLayout
       title="Produits"
-      subtitle={`${products?.length || 0} produit${(products?.length || 0) !== 1 ? "s" : ""} · ${outOfStockCount} rupture${outOfStockCount !== 1 ? "s" : ""}`}
+      subtitle={`${activeCount} actif${activeCount !== 1 ? "s" : ""} · ${inactiveCount} désactivé${inactiveCount !== 1 ? "s" : ""} · ${outOfStockCount} rupture${outOfStockCount !== 1 ? "s" : ""}`}
     >
       {/* Stock alerts */}
-      {(lowStockCount > 0 || outOfStockCount > 0) && (
+      {(lowStockCount > 0 || outOfStockCount > 0 || inactiveCount > 0) && (
         <div className="flex flex-wrap gap-2 mb-4">
+          {inactiveCount > 0 && (
+            <button
+              onClick={() => setStockFilter(stockFilter === "inactive" ? "all" : "inactive")}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                stockFilter === "inactive"
+                  ? "bg-gray-600 text-white border-gray-600"
+                  : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
+              }`}
+            >
+              <ToggleLeft className="h-3.5 w-3.5" />
+              {inactiveCount} désactivé{inactiveCount !== 1 ? "s" : ""}
+            </button>
+          )}
           {outOfStockCount > 0 && (
             <button
               onClick={() => setStockFilter(stockFilter === "out_of_stock" ? "all" : "out_of_stock")}
@@ -351,6 +374,7 @@ export default function AdminProducts() {
               <SelectItem value="in_stock">En stock</SelectItem>
               <SelectItem value="low_stock">Stock faible (≤5)</SelectItem>
               <SelectItem value="out_of_stock">Rupture</SelectItem>
+              <SelectItem value="inactive">Désactivés</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -368,7 +392,7 @@ export default function AdminProducts() {
             {filteredProducts.map((product) => {
               const category = categories?.find((c) => c.id === product.categoryId);
               return (
-                <div key={product.id} className="bg-white rounded-lg border p-3 flex gap-3">
+                <div key={product.id} className={`bg-white rounded-lg border p-3 flex gap-3 ${product.inStock === -1 ? "opacity-60" : ""}`}>
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                     {product.imageUrl ? (
                       <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -390,7 +414,9 @@ export default function AdminProducts() {
                           {category.emoji} {category.name}
                         </span>
                       )}
-                      {product.inStock > 0 ? (
+                      {product.inStock === -1 ? (
+                        <span className="text-[10px] text-gray-400 font-medium">Désactivé</span>
+                      ) : product.inStock > 0 ? (
                         <span className="text-[10px] text-green-600 font-medium">En stock</span>
                       ) : (
                         <span className="text-[10px] text-red-500 font-medium">Rupture</span>
@@ -398,6 +424,13 @@ export default function AdminProducts() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => toggleActive.mutate({ id: product.id, active: product.inStock === -1 })}
+                      title={product.inStock === -1 ? "Activer" : "Désactiver"}
+                      className={`p-2 rounded-lg transition-colors ${product.inStock === -1 ? "hover:bg-green-50 text-gray-400" : "hover:bg-gray-100 text-green-600"}`}
+                    >
+                      {product.inStock === -1 ? <ToggleLeft className="h-5 w-5" /> : <ToggleRight className="h-5 w-5" />}
+                    </button>
                     <button onClick={() => openDialog(product)} className="p-2 rounded-lg hover:bg-gray-100">
                       <Pencil className="h-4 w-4 text-gray-500" />
                     </button>
@@ -422,6 +455,7 @@ export default function AdminProducts() {
                     <th className="py-3 px-4 text-left font-medium text-gray-500 text-xs">Catégorie</th>
                     <th className="py-3 px-4 text-left font-medium text-gray-500 text-xs">Badge</th>
                     <th className="py-3 px-4 text-left font-medium text-gray-500 text-xs">Stock</th>
+                    <th className="py-3 px-4 text-left font-medium text-gray-500 text-xs">Statut</th>
                     <th className="py-3 px-4 text-right font-medium text-gray-500 text-xs">Actions</th>
                   </tr>
                 </thead>
@@ -429,7 +463,7 @@ export default function AdminProducts() {
                   {filteredProducts.map((product) => {
                     const category = categories?.find((c) => c.id === product.categoryId);
                     return (
-                      <tr key={product.id} className="border-b last:border-0 hover:bg-gray-50">
+                      <tr key={product.id} className={`border-b last:border-0 hover:bg-gray-50 ${product.inStock === -1 ? "opacity-60 bg-gray-50/50" : ""}`}>
                         <td className="py-3 px-4">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100">
                             {product.imageUrl ? (
@@ -457,7 +491,9 @@ export default function AdminProducts() {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          {product.inStock === 0 ? (
+                          {product.inStock === -1 ? (
+                            <Badge className="bg-gray-100 text-gray-500 text-xs border border-gray-200">—</Badge>
+                          ) : product.inStock === 0 ? (
                             <Badge className="bg-red-100 text-red-700 text-xs border border-red-200">Rupture</Badge>
                           ) : product.inStock <= 5 ? (
                             <Badge className="bg-amber-100 text-amber-700 text-xs border border-amber-200">
@@ -469,6 +505,25 @@ export default function AdminProducts() {
                               En stock ({product.inStock})
                             </Badge>
                           )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <button
+                            onClick={() => toggleActive.mutate({ id: product.id, active: product.inStock === -1 })}
+                            title={product.inStock === -1 ? "Activer le produit" : "Désactiver le produit"}
+                            className="flex items-center gap-1.5 group"
+                          >
+                            {product.inStock === -1 ? (
+                              <>
+                                <ToggleLeft className="h-6 w-6 text-gray-300 group-hover:text-green-500 transition-colors" />
+                                <span className="text-xs text-gray-400 group-hover:text-green-600">Inactif</span>
+                              </>
+                            ) : (
+                              <>
+                                <ToggleRight className="h-6 w-6 text-green-500 group-hover:text-gray-400 transition-colors" />
+                                <span className="text-xs text-green-600 group-hover:text-gray-400">Actif</span>
+                              </>
+                            )}
+                          </button>
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-1">

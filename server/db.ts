@@ -1,4 +1,4 @@
-import { eq, desc, and, like, sql } from "drizzle-orm";
+import { eq, desc, and, like, sql, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { InsertUser, users, categories, products, orders, customers, settings, banners, affiliateLinks, adBanners, productDrafts, productMedia, productSpecs, InsertCategory, InsertProduct, InsertOrder, InsertCustomer, InsertSetting, InsertBanner, InsertAffiliateLink, InsertAdBanner, InsertProductDraft, InsertProductMedia, InsertProductSpec } from "../drizzle/schema";
@@ -156,6 +156,14 @@ function fixProductImages<T extends { imageUrl?: string | null; image2Url?: stri
 
 // Products helpers
 export async function getAllProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  // inStock = -1 means disabled by admin — hidden from storefront
+  const rows = await db.select().from(products).where(ne(products.inStock, -1)).orderBy(desc(products.createdAt));
+  return rows.map(fixProductImages);
+}
+
+export async function getAllProductsAdmin() {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select().from(products).orderBy(desc(products.createdAt));

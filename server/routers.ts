@@ -107,6 +107,15 @@ export const appRouter = router({
     list: publicProcedure.query(async () => {
       return await db.getAllProducts();
     }),
+    listAdmin: adminProcedure.query(async () => {
+      return await db.getAllProductsAdmin();
+    }),
+    toggleActive: adminProcedure
+      .input(z.object({ id: z.number(), active: z.boolean() }))
+      .mutation(async ({ input }) => {
+        await db.updateProduct(input.id, { inStock: input.active ? 1 : -1 });
+        return { success: true };
+      }),
     getById: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
