@@ -112,18 +112,20 @@ export default function CustomerLogin() {
               {/* Phone */}
               <div>
                 <label className="text-xs text-white/60 font-medium mb-1.5 block">Numéro de téléphone</label>
-                <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                <div className="flex">
+                  <span
+                    className="flex items-center gap-1 px-3 rounded-l-xl text-sm font-semibold whitespace-nowrap text-white/70"
+                    style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.1)", borderRight: "none" }}
+                  >
+                    🇸🇳 +221
+                  </span>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="77 123 45 67"
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl text-sm text-white placeholder:text-white/25 outline-none transition-all"
-                    style={{
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
+                    className="flex-1 py-3.5 rounded-r-xl text-sm text-white placeholder:text-white/25 outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", paddingLeft: "14px" }}
                     onFocus={(e) => (e.target.style.borderColor = "rgba(168,210,78,0.5)")}
                     onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
                   />
