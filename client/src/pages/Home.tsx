@@ -548,22 +548,7 @@ export default function Home() {
         </div>
       </a>
 
-      {/* 🟢 Boutique Ouverte — Strip flottant premium */}
-      <div className="fixed bottom-[88px] md:bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none">
-        <div
-          className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black whitespace-nowrap"
-          style={{
-            background: "rgba(6,18,6,0.93)",
-            backdropFilter: "blur(14px)",
-            border: "1px solid rgba(168,210,78,0.6)",
-            color: "#A8D24E",
-            boxShadow: "0 0 20px rgba(168,210,78,0.28), 0 4px 14px rgba(0,0,0,0.55)",
-          }}
-        >
-          <span className="w-2 h-2 rounded-full bg-[#A8D24E] animate-pulse flex-shrink-0" />
-          🛍️ BOUTIQUE OUVERTE · Livraison 7j/7 · Dakar
-        </div>
-      </div>
+
 
       {/* 📺 Pub flottante vidéo/GIF — configurée via Admin › Publicités (position : homepage_floating) */}
       <div className="hidden md:block fixed bottom-24 left-6 z-30 max-w-[220px] rounded-2xl overflow-hidden shadow-2xl">

@@ -3,7 +3,7 @@ echo ==========================================
 echo ENVOI DE TOUTES LES MISES A JOUR VERS VERCEL
 echo ==========================================
 git add .
-git commit -m "fix: resolution probleme de chemins et variables supabase pour vercel"
+git commit -m "fix: Suppression de la banniere flottante en double"
 git push
 echo ==========================================
 echo TERMINE ! Vercel est en train de se mettre a jour.

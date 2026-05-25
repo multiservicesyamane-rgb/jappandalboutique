@@ -35,6 +35,15 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full shadow-lg">
+        {/* Top bar d'annonce */}
+        <div className="bg-[#1E5A8E] text-white py-1.5 px-4 text-xs sm:text-sm font-semibold text-center flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-4 w-full">
+          <span>BOUTIQUE OUVERTE - LIVRAISON 7J/7 - DAKAR</span>
+          <span className="hidden sm:inline">|</span>
+          <a href={`tel:${settings.phone1}`} className="flex items-center gap-1 hover:text-[#A8D24E] transition-colors">
+            <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
+            {settings.phone1}
+          </a>
+        </div>
         {/* Top bar — gradient animé */}
         <div className="header-gradient text-white relative overflow-hidden">
           {/* Orbe de lumière décoratif */}
