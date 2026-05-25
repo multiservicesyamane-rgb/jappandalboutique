@@ -101,7 +101,8 @@ export default function Home() {
       </section>
 
       {/* ─── CATEGORIES: small round circles, auto-scroll ─── */}
-      <section className="bg-white border-b">
+      <section className="relative bg-gradient-to-b from-[#0a1628] to-[#0d1f3a] border-b border-[#1E5A8E]/30">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(168,210,78,0.06),transparent_60%)] pointer-events-none" />
         <div className="py-2 sm:py-3">
           <div
             ref={categoriesScrollRef}
@@ -110,26 +111,26 @@ export default function Home() {
             {/* "Tout voir" pill */}
             <Link href="/categories">
               <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1E5A8E] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1E5A8E] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform" style={{ boxShadow: "0 0 14px rgba(30,90,142,0.55)" }}>
                   <Star className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <span className="text-[9px] sm:text-[10px] font-bold text-[#1E5A8E] leading-tight text-center">Tout voir</span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-[#A8D24E] leading-tight text-center">Tout voir</span>
               </div>
             </Link>
             {categoriesLoading
               ? [...Array(6)].map((_, i) => (
                   <div key={i} className="flex-shrink-0 flex flex-col items-center gap-1 w-14 sm:w-16 animate-pulse">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200" />
-                    <div className="h-2 bg-gray-200 rounded w-10" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1a2d4a]" />
+                    <div className="h-2 bg-[#1a2d4a] rounded w-10" />
                   </div>
                 ))
               : categories?.map((cat) => (
                   <Link key={cat.id} href={`/categories/${cat.slug}`}>
                     <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-center justify-center group-hover:border-[#1E5A8E]/40 group-hover:shadow-md transition-all group-hover:scale-105">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#162540] to-[#0a1a30] border border-[#1E5A8E]/40 flex items-center justify-center group-hover:border-[#A8D24E]/50 group-hover:shadow-lg transition-all group-hover:scale-105" style={{ boxShadow: "0 0 6px rgba(30,90,142,0.25)" }}>
                         <span className="text-lg sm:text-xl">{cat.emoji || "📦"}</span>
                       </div>
-                      <span className="text-[9px] sm:text-[10px] font-semibold text-gray-600 group-hover:text-[#1E5A8E] leading-tight text-center line-clamp-1 w-full">
+                      <span className="text-[9px] sm:text-[10px] font-semibold text-gray-300 group-hover:text-[#A8D24E] leading-tight text-center line-clamp-1 w-full">
                         {cat.name}
                       </span>
                     </div>
@@ -144,15 +145,19 @@ export default function Home() {
 
       {/* ─── VENTES FLASH TABASKI ─── */}
       {tabaskiProducts.length > 0 && (
-        <section className="py-6 sm:py-8 bg-gradient-to-b from-[#E9F3E5] to-white border-b">
-          <div className="container px-0 sm:px-4">
+        <section className="py-6 sm:py-8 relative overflow-hidden border-b border-[#A8D24E]/10" style={{ background: "linear-gradient(160deg, #030a03 0%, #061806 40%, #0a2a0a 70%, #030a03 100%)" }}>
+          {/* Orbes neon verts */}
+          <div className="absolute -top-8 right-0 w-48 h-48 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.18) 0%, transparent 70%)" }} />
+          <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(37,211,102,0.12) 0%, transparent 70%)" }} />
+          <div className="absolute top-1/2 right-1/4 w-24 h-24 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.08) 0%, transparent 70%)" }} />
+          <div className="container px-0 sm:px-4 relative z-10">
             <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
-              <h2 className="text-sm sm:text-base md:text-xl font-black text-green-800 flex items-center gap-2">
+              <h2 className="text-sm sm:text-base md:text-xl font-black flex items-center gap-2" style={{ color: "#A8D24E", textShadow: "0 0 12px rgba(168,210,78,0.5)" }}>
                 <span className="text-xl">🐏</span>
                 Spécial Tabaski
               </h2>
               <Link href="/produits">
-                <span className="text-green-700 text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm">
+                <span className="text-white text-[10px] sm:text-xs font-bold hover:underline cursor-pointer px-3 py-1 rounded-full" style={{ background: "rgba(168,210,78,0.15)", border: "1px solid rgba(168,210,78,0.35)" }}>
                   Voir les packs &gt;
                 </span>
               </Link>
@@ -183,26 +188,29 @@ export default function Home() {
 
       {/* ─── PRODUITS EN VEDETTE (CAROUSEL) ─── */}
       {productsLoading ? (
-        <div className="py-6 sm:py-8 bg-white border-b">
+        <div className="py-6 sm:py-8 relative border-b border-[#1E5A8E]/20" style={{ background: "linear-gradient(160deg, #05101e 0%, #0a1b30 50%, #05101e 100%)" }}>
           <div className="container">
-             <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+             <div className="h-6 w-48 bg-[#1a2d4a] rounded animate-pulse mb-4" />
              <div className="flex gap-4 overflow-hidden">
                {[1, 2, 3, 4].map(i => (
-                 <div key={i} className="w-[140px] sm:w-[180px] h-[200px] bg-gray-100 rounded-xl animate-pulse flex-shrink-0" />
+                 <div key={i} className="w-[140px] sm:w-[180px] h-[200px] bg-[#0f1f35] rounded-xl animate-pulse flex-shrink-0" />
                ))}
              </div>
           </div>
         </div>
       ) : featuredProducts.length > 0 && (
-        <section className="py-6 sm:py-8 bg-white border-b">
-          <div className="container px-0 sm:px-4">
+        <section className="py-6 sm:py-8 relative overflow-hidden border-b border-[#1E5A8E]/20" style={{ background: "linear-gradient(160deg, #05101e 0%, #0a1b30 50%, #05101e 100%)" }}>
+          {/* Orbes bleu neon */}
+          <div className="absolute -top-10 left-0 w-52 h-52 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(30,90,142,0.2) 0%, transparent 70%)" }} />
+          <div className="absolute bottom-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.1) 0%, transparent 70%)" }} />
+          <div className="container px-0 sm:px-4 relative z-10">
             <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
-              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-white flex items-center gap-2" style={{ textShadow: "0 0 10px rgba(168,210,78,0.3)" }}>
                 <Star className="h-4 w-4 sm:h-5 sm:w-5 text-[#A8D24E]" />
                 Produits en Vedette
               </h2>
               <Link href="/produits">
-                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">
+                <span className="text-[#A8D24E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">
                   Tout voir &gt;
                 </span>
               </Link>
@@ -232,16 +240,17 @@ export default function Home() {
       )}
 
       {/* ─── CAROUSELS PAR CATÉGORIE (max 4 pour la perf) ─── */}
-      {!productsLoading && productsByCategory.slice(0, 4).map((group) => (
-        <section key={group.category.id} className="py-6 sm:py-8 bg-gray-50 border-b last:border-b-0">
-          <div className="container px-0 sm:px-4">
+      {!productsLoading && productsByCategory.slice(0, 4).map((group, idx) => (
+        <section key={group.category.id} className="py-6 sm:py-8 relative overflow-hidden border-b border-gray-100 last:border-b-0" style={{ background: idx % 2 === 0 ? "linear-gradient(160deg, #ffffff 0%, #f4f8ff 50%, #f0f7f0 100%)" : "linear-gradient(160deg, #f8fdf4 0%, #eef7ee 50%, #f4f8ff 100%)" }}>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: idx % 2 === 0 ? "radial-gradient(ellipse at top right, rgba(30,90,142,0.04), transparent 60%)" : "radial-gradient(ellipse at bottom left, rgba(168,210,78,0.05), transparent 60%)" }} />
+          <div className="container px-0 sm:px-4 relative z-10">
             <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
               <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
                 <span className="text-xl">{group.category.emoji}</span>
                 {group.category.name}
               </h2>
               <Link href={`/categories/${group.category.slug}`}>
-                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm">
+                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
                   Voir tout &gt;
                 </span>
               </Link>
@@ -279,8 +288,10 @@ export default function Home() {
       <AdBanner position="homepage_bottom" className="container py-2" />
 
       {/* ─── CTA WhatsApp ─── */}
-      <section className="py-6 sm:py-8 md:py-12 bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(168,210,78,0.1),transparent_40%)]" />
+      <section className="py-6 sm:py-8 md:py-12 text-white relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0a1e36 0%, #122a0d 35%, #0d1a0a 60%, #0a1e36 100%)" }}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(168,210,78,0.12),transparent_45%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(30,90,142,0.15),transparent_45%)] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.05) 0%, transparent 70%)" }} />
         <div className="container text-center relative z-10">
           <h2 className="text-sm sm:text-base md:text-2xl font-extrabold mb-1.5 sm:mb-2">Besoin d'aide ?</h2>
           <p className="text-[10px] sm:text-xs md:text-sm opacity-80 mb-3 sm:mb-4 max-w-md mx-auto">
