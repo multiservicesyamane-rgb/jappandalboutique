@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { trpc } from "@/lib/trpc";
-import { Zap, ShoppingBag } from "lucide-react";
+import { Zap, ShoppingBag, Truck, ShieldCheck, BadgePercent, Clock, Star } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
 export default function Home() {

@@ -3,7 +3,7 @@ echo ==========================================
 echo ENVOI DE TOUTES LES MISES A JOUR VERS VERCEL
 echo ==========================================
 git add .
-git commit -m "fix: corriger l'erreur de syntaxe dans la page d'accueil"
+git commit -m "fix: imports manquants causant l'ecran d'erreur (Oups) sur l'accueil"
 git push
 echo ==========================================
 echo TERMINE ! Vercel est en train de se mettre a jour.
