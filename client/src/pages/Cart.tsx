@@ -49,7 +49,7 @@ export default function Cart() {
           quantity: i.quantity,
         })),
         customerName: name.trim(),
-        customerPhone: phone.trim(),
+        customerPhone: phone.trim().replace(/[^0-9]/g, ""),
         deliveryLocation: selectedZone?.name,
       });
     } catch {

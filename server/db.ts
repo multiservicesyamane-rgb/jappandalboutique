@@ -235,8 +235,9 @@ export async function getOrdersByPhone(phone: string) {
   const db = await getDb();
   if (!db) return [];
   const normalized = phone.replace(/[^0-9]/g, "");
+  // Strip non-digits from stored phone (handles spaces/dashes in old records)
   return await db.select().from(orders)
-    .where(like(orders.customerPhone, `%${normalized}%`))
+    .where(sql`regexp_replace(${orders.customerPhone}, '[^0-9]', '', 'g') LIKE ${'%' + normalized + '%'}`)
     .orderBy(desc(orders.createdAt))
     .limit(30);
 }
