@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
 import { ProductCard } from "@/components/ProductCard";
+import { AutoScrollCarousel } from "@/components/AutoScrollCarousel";
 import { trpc } from "@/lib/trpc";
 import { Zap, ShoppingBag, Truck, ShieldCheck, BadgePercent, Clock, Star } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -156,9 +157,13 @@ export default function Home() {
                 </span>
               </Link>
             </div>
-            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+            <AutoScrollCarousel
+              itemCount={tabaskiProducts.length}
+              className="gap-3 sm:gap-4 px-4 sm:px-0 pb-4"
+              speed={35}
+            >
               {tabaskiProducts.map((product) => (
-                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -171,7 +176,7 @@ export default function Home() {
                   />
                 </div>
               ))}
-            </div>
+            </AutoScrollCarousel>
           </div>
         </section>
       )}
@@ -202,9 +207,13 @@ export default function Home() {
                 </span>
               </Link>
             </div>
-            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+            <AutoScrollCarousel
+              itemCount={featuredProducts.length}
+              className="gap-3 sm:gap-4 px-4 sm:px-0 pb-4"
+              speed={35}
+            >
               {featuredProducts.map((product) => (
-                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -217,7 +226,7 @@ export default function Home() {
                   />
                 </div>
               ))}
-            </div>
+            </AutoScrollCarousel>
           </div>
         </section>
       )}
@@ -237,9 +246,13 @@ export default function Home() {
                 </span>
               </Link>
             </div>
-            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+            <AutoScrollCarousel
+              itemCount={group.items.length}
+              className="gap-3 sm:gap-4 px-4 sm:px-0 pb-4"
+              speed={35}
+            >
               {group.items.slice(0, 8).map((product) => (
-                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0">
                   <ProductCard
                     id={product.id}
                     name={product.name}
@@ -252,7 +265,7 @@ export default function Home() {
                   />
                 </div>
               ))}
-            </div>
+            </AutoScrollCarousel>
           </div>
         </section>
       ))}
