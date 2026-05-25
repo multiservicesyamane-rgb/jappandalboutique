@@ -12,7 +12,7 @@ const client = postgres(process.env.DATABASE_URL!);
 const db = drizzle(client, { schema });
 
 async function seedEpicesAndCategories() {
-  console.log('🌱 Début de la restructuration des catégories et de l\\'ajout des nouveaux produits...');
+  console.log("🌱 Début de la restructuration des catégories et de l'ajout des nouveaux produits...");
 
   // 1. Définition de la Nouvelle Structure des Catégories
   const newCategories = [
@@ -22,7 +22,7 @@ async function seedEpicesAndCategories() {
     { name: 'Sauces & Condiments', slug: 'sauces-condiments', emoji: '🥫', description: 'Huile, vinaigre, tomate, Maggi, sauce...' },
     { name: 'Produits Laitiers', slug: 'produits-laitiers', emoji: '🧀', description: 'Lait, beurre, fromage, mayonnaise' },
     { name: 'Petit-déjeuner & Sucreries', slug: 'petit-dejeuner-sucreries', emoji: '☕', description: 'Café, thé, sucre, Nutella, biscuits' },
-    { name: 'Conserves', slug: 'conserves', emoji: '🐟', description: 'Thon à l\\'huile, sardines...' },
+    { name: 'Conserves', slug: 'conserves', emoji: '🐟', description: "Thon à l'huile, sardines..." },
     { name: 'Fruits Secs & Noix', slug: 'fruits-secs-noix', emoji: '🥜', description: 'Raisins secs, noix de cajou, amandes...' },
     { name: 'Fruits & Légumes Frais', slug: 'fruits-legumes-frais', emoji: '🥬', description: 'Oignons, pommes de terre...' },
     { name: 'Boissons & Jus', slug: 'boissons', emoji: '🧃', description: 'Eau, jus, sodas, boissons énergétiques' },
@@ -41,10 +41,15 @@ async function seedEpicesAndCategories() {
     }
   }
   
-  // Ancien "Petit Déjeuner" -> "Petit-déjeuner & Sucreries"
+  // Migration de l'ancien "Petit Déjeuner"
   const petitDej = await db.select().from(schema.categories).where(eq(schema.categories.slug, 'petit-dejeuner'));
-  if (petitDej.length > 0) {
-    await db.update(schema.categories).set({ name: 'Petit-déjeuner & Sucreries', slug: 'petit-dejeuner-sucreries', emoji: '☕' }).where(eq(schema.categories.id, petitDej[0].id));
+  const newPetitDej = await db.select().from(schema.categories).where(eq(schema.categories.slug, 'petit-dejeuner-sucreries'));
+  
+  if (petitDej.length > 0 && newPetitDej.length > 0) {
+    // Migrer les produits
+    await db.update(schema.products).set({ categoryId: newPetitDej[0].id }).where(eq(schema.products.categoryId, petitDej[0].id));
+    // Supprimer l'ancienne catégorie
+    await db.delete(schema.categories).where(eq(schema.categories.id, petitDej[0].id));
   }
 
   const allCats = await db.select().from(schema.categories);
@@ -189,7 +194,7 @@ async function seedEpicesAndCategories() {
     { name: 'Biscuits', price: '4000', unit: '700g', categoryId: getCatId('petit-dejeuner-sucreries'), inStock: 1 },
 
     // Conserves
-    { name: 'Thon à l\\'huile (12 pièces)', price: '8000', unit: 'pack', categoryId: getCatId('conserves'), inStock: 1 },
+    { name: "Thon à l'huile (12 pièces)", price: '8000', unit: 'pack', categoryId: getCatId('conserves'), inStock: 1 },
 
     // Fruits secs & Noix
     { name: 'Noix de cajou', price: '1500', unit: '100g', categoryId: getCatId('fruits-secs-noix'), inStock: 1 },

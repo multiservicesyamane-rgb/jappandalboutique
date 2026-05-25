@@ -5,7 +5,7 @@ echo ==========================================
 echo.
 echo Ce script va restructurer vos categories et ajouter toutes les epices...
 echo.
-call npx tsx scripts/seed-epices-categories.ts
+call npx tsx scripts/seed-epices-categories.ts > ajout_log.txt 2>&1
 echo.
-echo Termine ! Verifiez votre site.
+echo Termine ! Regardez le fichier ajout_log.txt pour voir s'il y a eu des erreurs.
 pause
