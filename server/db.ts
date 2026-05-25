@@ -298,12 +298,6 @@ export async function getCustomerByEmail(email: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function getOrdersByPhone(phone: string) {
-  const db = await getDb();
-  if (!db) return [];
-  return await db.select().from(orders).where(eq(orders.customerPhone, phone)).orderBy(desc(orders.createdAt));
-}
-
 export async function createCustomer(customer: InsertCustomer) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
