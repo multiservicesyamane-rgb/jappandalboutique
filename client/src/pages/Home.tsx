@@ -25,34 +25,7 @@ export default function Home() {
 
   // Ventes Flash / Produits en vedette
   const featuredProducts = products?.slice(0, 8) || [];
-  // Auto-scroll categories
-  useEffect(() => {
-    const el = categoriesScrollRef.current;
-    if (!el) return;
-    let scrollPos = 0;
-    const speed = 0.5;
-    let animId: number;
-    const animate = () => {
-      scrollPos += speed;
-      if (scrollPos >= el.scrollWidth - el.clientWidth) scrollPos = 0;
-      el.scrollLeft = scrollPos;
-      animId = requestAnimationFrame(animate);
-    };
-    animId = requestAnimationFrame(animate);
-    const pause = () => cancelAnimationFrame(animId);
-    const resume = () => { animId = requestAnimationFrame(animate); };
-    el.addEventListener("pointerdown", pause);
-    el.addEventListener("pointerup", resume);
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("touchend", resume);
-    return () => {
-      cancelAnimationFrame(animId);
-      el.removeEventListener("pointerdown", pause);
-      el.removeEventListener("pointerup", resume);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("touchend", resume);
-    };
-  }, [categories]);
+  // Auto-scroll désactivé pour améliorer les performances sur mobile
 
   const advantages = [
     { icon: Truck, label: "Livraison 24h", sub: "Dakar & Banlieue" },
