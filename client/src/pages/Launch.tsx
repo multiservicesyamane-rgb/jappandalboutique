@@ -78,24 +78,10 @@ export default function Launch() {
   return (
     <div className="min-h-screen bg-[#0a0f1e] text-white overflow-x-hidden">
 
-      {/* Floating particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {[...Array(25)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full animate-pulse"
-            style={{
-              width: `${Math.random() * 5 + 2}px`,
-              height: `${Math.random() * 5 + 2}px`,
-              background: i % 3 === 0 ? "#A8D24E" : i % 3 === 1 ? "#1E5A8E" : "rgba(255,255,255,0.5)",
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: Math.random() * 0.4 + 0.1,
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${2 + Math.random() * 5}s`,
-            }}
-          />
-        ))}
+      {/* Décor statique — remplace les particles animées (perf mobile) */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-20 right-16 w-64 h-64 rounded-full bg-[#A8D24E]/5 blur-3xl" />
+        <div className="absolute bottom-32 left-10 w-48 h-48 rounded-full bg-[#1E5A8E]/8 blur-3xl" />
       </div>
 
       {/* ── NAV ── */}
@@ -557,8 +543,7 @@ export default function Launch() {
         <div
           className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black whitespace-nowrap"
           style={{
-            background: "rgba(6,18,6,0.93)",
-            backdropFilter: "blur(14px)",
+            background: "#061806",
             border: "1px solid rgba(168,210,78,0.6)",
             color: "#A8D24E",
             boxShadow: "0 0 20px rgba(168,210,78,0.28), 0 4px 14px rgba(0,0,0,0.55)",

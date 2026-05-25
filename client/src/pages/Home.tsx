@@ -222,8 +222,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* ─── CAROUSELS PAR CATÉGORIE ─── */}
-      {!productsLoading && productsByCategory.map((group) => (
+      {/* ─── CAROUSELS PAR CATÉGORIE (max 4 pour la perf) ─── */}
+      {!productsLoading && productsByCategory.slice(0, 4).map((group) => (
         <section key={group.category.id} className="py-6 sm:py-8 bg-gray-50 border-b last:border-b-0">
           <div className="container px-0 sm:px-4">
             <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
@@ -310,10 +310,6 @@ export default function Home() {
 
 
 
-      {/* 📺 Pub flottante vidéo/GIF — configurée via Admin › Publicités (position : homepage_floating) */}
-      <div className="hidden md:block fixed bottom-24 left-6 z-30 max-w-[220px] rounded-2xl overflow-hidden shadow-2xl">
-        <AdBanner position="homepage_floating" />
-      </div>
     </div>
   );
 }

@@ -37,29 +37,19 @@ function IsolatedHtmlBanner({ content, bannerId, onClick }: { content: string; b
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) return;
-    doc.open();
-    doc.write(`<!DOCTYPE html><html><head><style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { overflow: hidden; font-family: sans-serif; }
-      img { max-width: 100%; height: auto; display: block; }
-      video { max-width: 100%; height: auto; display: block; }
-    </style></head><body>${content}</body></html>`);
-    doc.close();
 
-    const resizeObserver = new ResizeObserver(() => {
-      const body = doc.body;
-      if (body) {
-        const h = body.scrollHeight;
-        if (h > 0) setHeight(h);
-      }
-    });
-    if (doc.body) {
-      resizeObserver.observe(doc.body);
-      setTimeout(() => { if (doc.body?.scrollHeight) setHeight(doc.body.scrollHeight); }, 500);
-    }
-    return () => resizeObserver.disconnect();
+    const html = `<!DOCTYPE html><html><head><style>* { margin: 0; padding: 0; box-sizing: border-box; } body { overflow: hidden; font-family: sans-serif; } img, video { max-width: 100%; height: auto; display: block; }</style></head><body>${content}</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const blobUrl = URL.createObjectURL(blob);
+    iframe.src = blobUrl;
+
+    const onLoad = () => {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc?.body?.scrollHeight) setHeight(doc.body.scrollHeight);
+      URL.revokeObjectURL(blobUrl);
+    };
+    iframe.addEventListener("load", onLoad);
+    return () => iframe.removeEventListener("load", onLoad);
   }, [content]);
 
   return (
@@ -112,7 +102,7 @@ function GifBanner({ src, alt, linkUrl, onClick }: { src: string; alt: string; l
 }
 
 /** YouTube or Vimeo embed */
-function EmbedBanner({ embedSrc, linkUrl, onClick }: { embedSrc: string; linkUrl?: string | null; onClick: () => void }) {
+function EmbedBanner({ embedSrc, onClick }: { embedSrc: string; onClick: () => void }) {
   return (
     <div className="relative w-full rounded-xl overflow-hidden shadow-md" style={{ paddingBottom: "56.25%" }}>
       <iframe
@@ -128,7 +118,10 @@ function EmbedBanner({ embedSrc, linkUrl, onClick }: { embedSrc: string; linkUrl
 }
 
 function AdBannerInner({ position, className = "" }: AdBannerProps) {
-  const { data: banners = [] } = trpc.adBanners.getByPosition.useQuery({ position });
+  const { data: banners = [] } = trpc.adBanners.getByPosition.useQuery(
+    { position },
+    { staleTime: 60 * 60 * 1000, gcTime: 60 * 60 * 1000 } // 1h — les pubs changent peu souvent
+  );
   const trackImpression = trpc.adBanners.trackImpression.useMutation();
   const trackClick = trpc.adBanners.trackClick.useMutation();
   const trackedRef = useRef<Set<number>>(new Set());
@@ -175,7 +168,6 @@ function AdBannerInner({ position, className = "" }: AdBannerProps) {
               <div key={banner.id} className="ad-banner-item mb-4">
                 <EmbedBanner
                   embedSrc={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}`}
-                  linkUrl={banner.linkUrl}
                   onClick={() => handleClick(banner.id)}
                 />
               </div>
@@ -189,7 +181,6 @@ function AdBannerInner({ position, className = "" }: AdBannerProps) {
               <div key={banner.id} className="ad-banner-item mb-4">
                 <EmbedBanner
                   embedSrc={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1`}
-                  linkUrl={banner.linkUrl}
                   onClick={() => handleClick(banner.id)}
                 />
               </div>
@@ -202,7 +193,6 @@ function AdBannerInner({ position, className = "" }: AdBannerProps) {
               <div key={banner.id} className="ad-banner-item mb-4">
                 <VideoBanner
                   src={content}
-                  linkUrl={banner.linkUrl}
                   onClick={() => handleClick(banner.id)}
                 />
               </div>
@@ -216,7 +206,6 @@ function AdBannerInner({ position, className = "" }: AdBannerProps) {
                 <GifBanner
                   src={content}
                   alt={banner.name}
-                  linkUrl={banner.linkUrl}
                   onClick={() => handleClick(banner.id)}
                 />
               </div>
