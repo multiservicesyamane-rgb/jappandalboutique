@@ -216,11 +216,37 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const totalAmount = (parseFloat(input.productPrice) * input.quantity).toFixed(2);
-        await db.createOrder({
-          ...input,
-          totalAmount,
-        });
-        return { success: true };
+        const order = await db.createOrder({ ...input, totalAmount });
+        return { success: true, orderId: order?.id };
+      }),
+    createFromCart: publicProcedure
+      .input(z.object({
+        items: z.array(z.object({
+          productId: z.number(),
+          productName: z.string(),
+          productPrice: z.string(),
+          quantity: z.number(),
+        })),
+        customerName: z.string(),
+        customerPhone: z.string(),
+        deliveryLocation: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { items, ...customer } = input;
+        const created = await Promise.all(items.map(item =>
+          db.createOrder({
+            ...item,
+            ...customer,
+            totalAmount: (parseFloat(item.productPrice) * item.quantity).toFixed(2),
+          })
+        ));
+        return { success: true, firstOrderId: created[0]?.id };
+      }),
+    getByPhone: publicProcedure
+      .input(z.object({ phone: z.string().min(6) }))
+      .query(async ({ input }) => {
+        return await db.getOrdersByPhone(input.phone);
       }),
     update: adminProcedure
       .input(z.object({

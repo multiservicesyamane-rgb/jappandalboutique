@@ -35,6 +35,7 @@ const CustomerRegister = React.lazy(() => import("./pages/account/Register"));
 const CustomerAccount = React.lazy(() => import("./pages/account/Account"));
 const PaymentSuccess = React.lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCancel = React.lazy(() => import("./pages/PaymentCancel"));
+const OrderTracking = React.lazy(() => import("./pages/OrderTracking"));
 const Launch = React.lazy(() => import("./pages/Launch"));
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
         <Route path="/panier" component={Cart} />
         <Route path="/paiement-succes" component={PaymentSuccess} />
         <Route path="/paiement-annule" component={PaymentCancel} />
+        <Route path="/suivi-commande" component={OrderTracking} />
 
         {/* Espace client */}
         <Route path="/compte" component={CustomerAccount} />

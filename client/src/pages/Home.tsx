@@ -12,11 +12,20 @@ import { useSettings } from "@/contexts/SettingsContext";
 export default function Home() {
   const settings = useSettings();
   const { data: categories, isLoading: categoriesLoading } = trpc.categories.list.useQuery();
-  const { data: products } = trpc.products.list.useQuery();
+  const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
   // Tabaski special section
   const tabaskiProducts = products?.filter(p => p.badge?.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("mouton") || p.name.toLowerCase().includes("pack") || p.name.toLowerCase().includes("grillade")) || [];
+
+  // Produits en vedette
+  const featuredProducts = products?.slice(0, 8) || [];
+
+  // Par catégorie
+  const productsByCategory = categories?.map(cat => ({
+    category: cat,
+    items: products?.filter(p => p.categoryId === cat.id) || [],
+  })).filter(g => g.items.length > 0) || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -170,6 +179,66 @@ export default function Home() {
       )}
 
 
+
+      {/* ─── PRODUITS EN VEDETTE ─── */}
+      {productsLoading ? (
+        <div className="py-6 sm:py-8 relative border-b border-[#1E5A8E]/20" style={{ background: "linear-gradient(160deg, #05101e 0%, #0a1b30 50%, #05101e 100%)" }}>
+          <div className="container">
+            <div className="h-6 w-48 bg-[#1a2d4a] rounded animate-pulse mb-4" />
+            <div className="flex gap-4 overflow-hidden">
+              {[1,2,3,4].map(i => <div key={i} className="w-[140px] sm:w-[180px] h-[200px] bg-[#0f1f35] rounded-xl animate-pulse flex-shrink-0" />)}
+            </div>
+          </div>
+        </div>
+      ) : featuredProducts.length > 0 && (
+        <section className="py-6 sm:py-8 relative overflow-hidden border-b border-[#1E5A8E]/20" style={{ background: "linear-gradient(160deg, #05101e 0%, #0a1b30 50%, #05101e 100%)" }}>
+          <div className="absolute -top-10 left-0 w-52 h-52 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(30,90,142,0.2) 0%, transparent 70%)" }} />
+          <div className="absolute bottom-0 right-0 w-40 h-40 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.1) 0%, transparent 70%)" }} />
+          <div className="container px-0 sm:px-4 relative z-10">
+            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-white flex items-center gap-2" style={{ textShadow: "0 0 10px rgba(168,210,78,0.3)" }}>
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-[#A8D24E]" />
+                Produits en Vedette
+              </h2>
+              <Link href="/produits">
+                <span className="text-[#A8D24E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">Tout voir &gt;</span>
+              </Link>
+            </div>
+            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x snap-mandatory">
+              {featuredProducts.map((product) => (
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                  <ProductCard id={product.id} name={product.name} price={product.price} unit={product.unit} imageUrl={product.imageUrl} badge={product.badge} inStock={product.inStock} compact />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── CAROUSELS PAR CATÉGORIE (max 4) ─── */}
+      {!productsLoading && productsByCategory.slice(0, 4).map((group, idx) => (
+        <section key={group.category.id} className="py-6 sm:py-8 relative overflow-hidden border-b border-gray-100 last:border-b-0" style={{ background: idx % 2 === 0 ? "linear-gradient(160deg, #ffffff 0%, #f4f8ff 50%, #f0f7f0 100%)" : "linear-gradient(160deg, #f8fdf4 0%, #eef7ee 50%, #f4f8ff 100%)" }}>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: idx % 2 === 0 ? "radial-gradient(ellipse at top right, rgba(30,90,142,0.04), transparent 60%)" : "radial-gradient(ellipse at bottom left, rgba(168,210,78,0.05), transparent 60%)" }} />
+          <div className="container px-0 sm:px-4 relative z-10">
+            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+                <span className="text-xl">{group.category.emoji}</span>
+                {group.category.name}
+              </h2>
+              <Link href={`/categories/${group.category.slug}`}>
+                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">Voir tout &gt;</span>
+              </Link>
+            </div>
+            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x snap-mandatory">
+              {group.items.slice(0, 8).map((product) => (
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                  <ProductCard id={product.id} name={product.name} price={product.price} unit={product.unit} imageUrl={product.imageUrl} badge={product.badge} inStock={product.inStock} compact />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
 
       {/* ─── BANNIÈRE PUB MILIEU ─── */}
       <AdBanner position="homepage_middle" className="container py-2" />

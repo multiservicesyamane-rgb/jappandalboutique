@@ -227,8 +227,18 @@ export async function getOrderById(id: number) {
 export async function createOrder(order: InsertOrder) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(orders).values(order);
-  return result;
+  const result = await db.insert(orders).values(order).returning({ id: orders.id });
+  return result[0];
+}
+
+export async function getOrdersByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const normalized = phone.replace(/[^0-9]/g, "");
+  return await db.select().from(orders)
+    .where(like(orders.customerPhone, `%${normalized}%`))
+    .orderBy(desc(orders.createdAt))
+    .limit(30);
 }
 
 export async function updateOrder(id: number, order: Partial<InsertOrder>) {
