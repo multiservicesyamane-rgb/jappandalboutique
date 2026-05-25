@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
+import { generateReceipt } from "@/lib/generateReceipt";
 import {
   Eye,
   ShoppingCart,
@@ -35,6 +36,7 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Printer,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -59,6 +61,25 @@ const statusLabels: Record<string, string> = {
 };
 
 const PAGE_SIZE = 20;
+
+function printOrderReceipt(order: any, shopName: string, shopPhone: string) {
+  generateReceipt({
+    orderId: order.id,
+    shopName,
+    shopPhone: shopPhone.replace(/[^0-9]/g, ""),
+    customerName: order.customerName || "",
+    customerPhone: order.customerPhone || "",
+    deliveryLocation: order.deliveryLocation,
+    items: [{
+      name: order.productName || "",
+      quantity: order.quantity || 1,
+      unitPrice: parseFloat(order.productPrice || "0"),
+      total: parseFloat(order.totalAmount || "0"),
+    }],
+    date: order.createdAt,
+    status: order.status,
+  });
+}
 
 function buildWhatsAppMessage(order: any, shopName: string): string {
   const amount = parseFloat(order.totalAmount || "0").toLocaleString("fr-FR");
@@ -316,6 +337,15 @@ export default function AdminOrders() {
                     <Eye className="h-3.5 w-3.5" />
                     Détails
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs gap-1 border-orange-200 text-orange-600 hover:bg-orange-50"
+                    onClick={() => printOrderReceipt(order, settings.shopName, settings.phone1 || "")}
+                    title="Imprimer le reçu"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                  </Button>
                   {order.customerPhone && (
                     <a
                       href={`https://wa.me/${order.customerPhone.replace(/[^0-9]/g, "")}?text=${buildWhatsAppMessage(order, settings.shopName)}`}
@@ -380,6 +410,13 @@ export default function AdminOrders() {
                             title="Voir les détails"
                           >
                             <Eye className="h-4 w-4 text-gray-500" />
+                          </button>
+                          <button
+                            onClick={() => printOrderReceipt(order, settings.shopName, settings.phone1 || "")}
+                            className="p-2 rounded-lg hover:bg-orange-50"
+                            title="Imprimer le reçu"
+                          >
+                            <Printer className="h-4 w-4 text-orange-500" />
                           </button>
                           {order.customerPhone && (
                             <a
