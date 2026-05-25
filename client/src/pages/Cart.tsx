@@ -75,7 +75,8 @@ export default function Cart() {
       "Merci de confirmer la disponibilité et l'heure de livraison. 🙏",
     ].join("\n");
 
-    const phoneNum = settings.phone1.replace(/[^0-9]/g, "");
+    const rawPhone = settings.phone1.replace(/[^0-9]/g, "");
+    const phoneNum = rawPhone.startsWith("221") ? rawPhone : `221${rawPhone}`;
     window.open(`https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`, "_blank");
     clearCart();
     setIsSubmitting(false);
@@ -232,13 +233,18 @@ export default function Cart() {
                 <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-1.5">
                   <Phone className="h-4 w-4 text-[#1E5A8E]" /> Numéro de téléphone
                 </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Ex: 77 123 45 67"
-                  className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5A8E]/40 focus:border-[#1E5A8E]"
-                />
+                <div className="flex">
+                  <span className="flex items-center gap-1 border border-r-0 rounded-l-xl px-3 py-3 bg-gray-50 text-sm text-gray-600 font-semibold whitespace-nowrap">
+                    🇸🇳 +221
+                  </span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="77 123 45 67"
+                    className="flex-1 border rounded-r-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E5A8E]/40 focus:border-[#1E5A8E]"
+                  />
+                </div>
               </div>
 
               {/* Zone de livraison */}
