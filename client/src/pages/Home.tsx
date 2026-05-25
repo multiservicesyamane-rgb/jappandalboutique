@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdBanner } from "@/components/AdBanner";
+import { ProductCard } from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
 import { Zap, ShoppingBag, Truck, ShieldCheck, BadgePercent, Clock, Star } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -10,6 +11,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 export default function Home() {
   const settings = useSettings();
   const { data: categories, isLoading: categoriesLoading } = trpc.categories.list.useQuery();
+  const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
   // Auto-scroll categories
   useEffect(() => {
@@ -198,6 +200,62 @@ export default function Home() {
 
       {/* ─── BANNIÈRE PUB HAUT ─── */}
       <AdBanner position="homepage_top" className="container mt-2 mb-0" />
+
+      {/* ─── TOUS LES PRODUITS (GRILLE) ─── */}
+      <section className="bg-gray-50 py-4 sm:py-6 md:py-8">
+        <div className="container">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-[#1E5A8E]" />
+              Nos Produits
+            </h2>
+            <Link href="/produits">
+              <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">
+                Tout voir &gt;
+              </span>
+            </Link>
+          </div>
+          
+          {productsLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl sm:rounded-2xl shadow-sm animate-pulse">
+                  <div className="aspect-[4/3] bg-gray-200 rounded-t-xl sm:rounded-t-2xl" />
+                  <div className="p-3 sm:p-4 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+              {products?.slice(0, 24).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  unit={product.unit}
+                  imageUrl={product.imageUrl}
+                  badge={product.badge}
+                  inStock={product.inStock}
+                />
+              ))}
+            </div>
+          )}
+          
+          {products && products.length > 24 && (
+            <div className="mt-6 flex justify-center">
+              <Link href="/produits">
+                <span className="inline-flex items-center gap-2 bg-white border border-[#1E5A8E]/20 text-[#1E5A8E] px-6 py-2.5 rounded-full text-xs font-bold hover:bg-gray-50 transition-colors shadow-sm cursor-pointer">
+                  Voir tout le catalogue
+                </span>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
 
 
       {/* ─── BANNIÈRE PUB MILIEU ─── */}
