@@ -13,6 +13,15 @@ export default function Home() {
   const { data: categories, isLoading: categoriesLoading } = trpc.categories.list.useQuery();
   const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
+
+  // Group products by category for the carousels
+  const productsByCategory = categories?.map(cat => ({
+    category: cat,
+    items: products?.filter(p => p.categoryId === cat.id) || []
+  })).filter(group => group.items.length > 0) || [];
+
+  // Ventes Flash / Produits en vedette
+  const featuredProducts = products?.slice(0, 10) || [];
   // Auto-scroll categories
   useEffect(() => {
     const el = categoriesScrollRef.current;
@@ -201,61 +210,86 @@ export default function Home() {
       {/* ─── BANNIÈRE PUB HAUT ─── */}
       <AdBanner position="homepage_top" className="container mt-2 mb-0" />
 
-      {/* ─── TOUS LES PRODUITS (GRILLE) ─── */}
-      <section className="bg-gray-50 py-4 sm:py-6 md:py-8">
-        <div className="container">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-[#1E5A8E]" />
-              Nos Produits
-            </h2>
-            <Link href="/produits">
-              <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">
-                Tout voir &gt;
-              </span>
-            </Link>
+      {/* ─── PRODUITS EN VEDETTE (CAROUSEL) ─── */}
+      {productsLoading ? (
+        <div className="py-6 sm:py-8 bg-white border-b">
+          <div className="container">
+             <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+             <div className="flex gap-4 overflow-hidden">
+               {[1, 2, 3, 4].map(i => (
+                 <div key={i} className="w-[140px] sm:w-[180px] h-[200px] bg-gray-100 rounded-xl animate-pulse flex-shrink-0" />
+               ))}
+             </div>
           </div>
-          
-          {productsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl sm:rounded-2xl shadow-sm animate-pulse">
-                  <div className="aspect-[4/3] bg-gray-200 rounded-t-xl sm:rounded-t-2xl" />
-                  <div className="p-3 sm:p-4 space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-2/3" />
-                    <div className="h-4 bg-gray-200 rounded w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {products?.slice(0, 24).map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  unit={product.unit}
-                  imageUrl={product.imageUrl}
-                  badge={product.badge}
-                  inStock={product.inStock}
-                />
-              ))}
-            </div>
-          )}
-          
-          {products && products.length > 24 && (
-            <div className="mt-6 flex justify-center">
+        </div>
+      ) : featuredProducts.length > 0 && (
+        <section className="py-6 sm:py-8 bg-white border-b">
+          <div className="container px-0 sm:px-4">
+            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-[#A8D24E]" />
+                Produits en Vedette
+              </h2>
               <Link href="/produits">
-                <span className="inline-flex items-center gap-2 bg-white border border-[#1E5A8E]/20 text-[#1E5A8E] px-6 py-2.5 rounded-full text-xs font-bold hover:bg-gray-50 transition-colors shadow-sm cursor-pointer">
-                  Voir tout le catalogue
+                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer">
+                  Tout voir &gt;
                 </span>
               </Link>
             </div>
-          )}
-        </div>
-      </section>
+            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+              {featuredProducts.map((product) => (
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    unit={product.unit}
+                    imageUrl={product.imageUrl}
+                    badge={product.badge}
+                    inStock={product.inStock}
+                    compact
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── CAROUSELS PAR CATÉGORIE ─── */}
+      {!productsLoading && productsByCategory.map((group) => (
+        <section key={group.category.id} className="py-6 sm:py-8 bg-gray-50 border-b last:border-b-0">
+          <div className="container px-0 sm:px-4">
+            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+                <span className="text-xl">{group.category.emoji}</span>
+                {group.category.name}
+              </h2>
+              <Link href={`/categories/${group.category.slug}`}>
+                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm">
+                  Voir tout &gt;
+                </span>
+              </Link>
+            </div>
+            <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
+              {group.items.slice(0, 10).map((product) => (
+                <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    unit={product.unit}
+                    imageUrl={product.imageUrl}
+                    badge={product.badge}
+                    inStock={product.inStock}
+                    compact
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
 
 
       {/* ─── BANNIÈRE PUB MILIEU ─── */}
