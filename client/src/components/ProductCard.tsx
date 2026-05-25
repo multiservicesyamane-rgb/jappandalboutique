@@ -44,16 +44,12 @@ export function ProductCard({
     <Link href={`/produits/${id}`} className="block h-full">
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden card-hover-glow group cursor-pointer h-full flex flex-col">
         {/* Image */}
-        <div className={`relative overflow-hidden bg-gradient-to-br from-white via-white to-[#E9F3E5] ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
-          {/* Subtle light effect overlaid (green glowing aura) */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.8),transparent_60%)] pointer-events-none"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(168,210,78,0.1),transparent_50%)] pointer-events-none"></div>
-          
+        <div className={`relative overflow-hidden bg-gray-50 ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={name}
-              className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 drop-shadow-xl relative z-10"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-10"
               loading="lazy"
             />
           ) : (

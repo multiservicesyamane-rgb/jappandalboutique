@@ -24,7 +24,7 @@ export default function Home() {
   const tabaskiProducts = products?.filter(p => p.badge?.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("mouton") || p.name.toLowerCase().includes("pack") || p.name.toLowerCase().includes("grillade")) || [];
 
   // Ventes Flash / Produits en vedette
-  const featuredProducts = products?.slice(0, 10) || [];
+  const featuredProducts = products?.slice(0, 8) || [];
   // Auto-scroll categories
   useEffect(() => {
     const el = categoriesScrollRef.current;
@@ -310,7 +310,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x">
-              {group.items.slice(0, 10).map((product) => (
+              {group.items.slice(0, 8).map((product) => (
                 <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
                   <ProductCard
                     id={product.id}

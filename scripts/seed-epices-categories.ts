@@ -69,6 +69,12 @@ async function seedEpicesAndCategories() {
       nameLower.includes('omo') || nameLower.includes('savon') || nameLower.includes('javel') || nameLower.includes('madar') || nameLower.includes('digestion') || nameLower.includes('nila') || nameLower.includes('rose')
     ) {
       newCatId = getCatId('maison-bien-etre');
+    } else {
+      // Fallback: Si le produit est toujours dans une ancienne catégorie, on le met dans épicerie par défaut
+      const currentCat = allCats.find(c => c.id === p.categoryId);
+      if (currentCat && !newCategories.map(c => c.slug).includes(currentCat.slug) && currentCat.slug !== 'packs-tabaski') {
+        newCatId = getCatId('epicerie-cuisine');
+      }
     }
 
     if (newCatId !== p.categoryId) {
