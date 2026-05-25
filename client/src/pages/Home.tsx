@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { AdBanner } from "@/components/AdBanner";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { playNotificationSound } from "@/lib/playNotificationSound";
@@ -260,6 +261,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── BANNIÈRE PUB HAUT ─── */}
+      <AdBanner position="homepage_top" className="container mt-2 mb-0" />
+
       {/* ─── VENTES FLASH TABASKI ─── */}
       {tabaskiProducts.length > 0 && (
         <section className="py-3 sm:py-4 bg-gradient-to-b from-white to-gray-50 border-t border-b">
@@ -421,6 +425,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── BANNIÈRE PUB MILIEU ─── */}
+      <AdBanner position="homepage_middle" className="container py-2" />
+
       {/* ─── PRODUCTS BY CATEGORY ─── */}
       {productsByCategory
         .filter((cat) => cat.products.length > 0 && cat.slug !== "packs-tabaski")
@@ -460,6 +467,9 @@ export default function Home() {
             </div>
           </section>
         ))}
+
+      {/* ─── BANNIÈRE PUB BAS ─── */}
+      <AdBanner position="homepage_bottom" className="container py-2" />
 
       {/* ─── CTA WhatsApp ─── */}
       <section className="py-6 sm:py-8 md:py-12 bg-gradient-to-r from-[#1E5A8E] to-[#0D3B0D] text-white relative overflow-hidden">

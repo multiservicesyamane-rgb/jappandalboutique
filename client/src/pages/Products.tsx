@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductNotFound } from "@/components/ProductNotFound";
+import { AdBanner } from "@/components/AdBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
@@ -106,6 +107,9 @@ export default function Products() {
             </div>
           </div>
         </div>
+
+        {/* Bannière pub */}
+        <AdBanner position="products_top" className="container pt-2" />
 
         {/* Search bar mobile */}
         <div className="container py-3">

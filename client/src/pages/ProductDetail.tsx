@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
+import { AdBanner } from "@/components/AdBanner";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -30,6 +31,7 @@ export default function ProductDetail() {
   const { data: product, isLoading } = trpc.products.getById.useQuery({ id: productId });
   const { data: allProducts } = trpc.products.list.useQuery();
   const { data: categories } = trpc.categories.list.useQuery();
+
 
   const relatedProducts = allProducts
     ?.filter((p) => p.categoryId === product?.categoryId && p.id !== productId)
@@ -273,6 +275,8 @@ export default function ProductDetail() {
             </div>
           </div>
         )}
+        {/* Bannière pub bas mobile */}
+        <AdBanner position="product_detail_bottom" className="px-4 pt-2 pb-2" />
       </main>
 
       {/* ─── DESKTOP LAYOUT ─── */}
@@ -440,6 +444,9 @@ export default function ProductDetail() {
               </div>
             </div>
           )}
+
+          {/* Bannière pub desktop */}
+          <AdBanner position="product_detail_bottom" className="mt-6" />
         </div>
         <Footer />
       </main>
