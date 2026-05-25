@@ -272,9 +272,9 @@ export default function ProductDetail() {
                 <span className="text-xs text-[#A8D24E] font-semibold">Voir plus</span>
               </Link>
             </div>
-            <div className="flex overflow-x-auto gap-3 -mx-4 px-4 pb-2 scrollbar-hide">
+            <div className="flex overflow-x-auto gap-3 -mx-4 px-4 pb-2 scrollbar-hide snap-x snap-mandatory scroll-smooth">
               {relatedProducts.map((p) => (
-                <div key={p.id} className="flex-shrink-0 w-[45vw]">
+                <div key={p.id} className="flex-shrink-0 w-[45vw] snap-start">
                   <ProductCard id={p.id} name={p.name} price={p.price} unit={p.unit} imageUrl={p.imageUrl} badge={p.badge} inStock={p.inStock} compact />
                 </div>
               ))}
