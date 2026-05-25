@@ -3,6 +3,7 @@ import { ShoppingCart, Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useState } from "react";
 import { playNotificationSound } from "@/lib/playNotificationSound";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface ProductCardProps {
   id: number;
@@ -26,6 +27,7 @@ export function ProductCard({
   compact = false,
 }: ProductCardProps) {
   const { addItem } = useCart();
+  const { logoUrl } = useSettings();
   const [justAdded, setJustAdded] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -46,12 +48,23 @@ export function ProductCard({
         {/* Image */}
         <div className={`relative overflow-hidden bg-gray-50 ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-10"
-              loading="lazy"
-            />
+            <>
+              <img
+                src={imageUrl}
+                alt={name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-10"
+                loading="lazy"
+              />
+              {logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 m-auto z-20 pointer-events-none select-none"
+                  style={{ width: "45%", height: "45%", objectFit: "contain", opacity: 0.07 }}
+                />
+              )}
+            </>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center relative z-10">
               <span className="text-sm font-black text-[#1E5A8E]/60 uppercase tracking-wide leading-tight">
