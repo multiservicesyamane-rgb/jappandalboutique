@@ -165,50 +165,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── ADVANTAGES TICKER (auto-scroll inline) ─── */}
-      <section className="bg-white border-b overflow-hidden">
-        <div className="advantages-ticker py-2">
-          <div className="advantages-ticker-track">
-            {[...advantages, ...advantages, ...advantages].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-1.5 px-3 sm:px-4 whitespace-nowrap"
-              >
-                <item.icon className="h-3.5 w-3.5 text-[#1E5A8E] flex-shrink-0" />
-                <span className="text-[10px] sm:text-xs font-bold text-gray-800">{item.label}</span>
-                <span className="text-[9px] sm:text-[10px] text-gray-400 hidden sm:inline">— {item.sub}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ─── BANDE PROMO ANIMÉE ─── */}
-      <div className="bg-gradient-to-r from-[#061406] via-[#0D3B0D] to-[#061406] border-y border-[#A8D24E]/25 overflow-hidden">
-        <div className="advantages-ticker py-2">
-          <div className="advantages-ticker-track">
-            {[
-              "🛍️ BOUTIQUE OUVERTE",
-              "🚀 Livraison Express 24h à Dakar",
-              "🐏 Packs Tabaski disponibles",
-              "💚 Produits 100% frais & sains",
-              "📦 500+ produits en stock",
-              "🇸🇳 GIE des Jeunes Conscients",
-              "🎁 Commandes personnalisées",
-              "📞 Service client 7j/7",
-              "🛍️ BOUTIQUE OUVERTE",
-              "🚀 Livraison Express 24h à Dakar",
-              "🐏 Packs Tabaski disponibles",
-              "💚 Produits 100% frais & sains",
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 sm:px-6 whitespace-nowrap">
-                <span className="text-[#A8D24E] text-[10px] sm:text-xs font-black">{item}</span>
-                <span className="text-[#A8D24E]/30 text-xs">·</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* ─── BANNIÈRE PUB HAUT ─── */}
       <AdBanner position="homepage_top" className="container mt-2 mb-0" />

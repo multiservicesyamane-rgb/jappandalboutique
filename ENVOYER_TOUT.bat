@@ -3,7 +3,7 @@ echo ==========================================
 echo ENVOI DE TOUTES LES MISES A JOUR VERS VERCEL
 echo ==========================================
 git add .
-git commit -m "perf: Optimisation drastique de la vitesse (mise en cache React Query et limitation d'affichage)"
+git commit -m "style: Suppression des bandes de defilement pour simplifier l'accueil"
 git push
 echo ==========================================
 echo TERMINE ! Vercel est en train de se mettre a jour.
