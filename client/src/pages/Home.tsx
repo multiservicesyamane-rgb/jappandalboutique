@@ -10,8 +10,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 export default function Home() {
   const settings = useSettings();
   const { data: categories, isLoading: categoriesLoading } = trpc.categories.list.useQuery();
-
-
+  const categoriesScrollRef = useRef<HTMLDivElement>(null);
   // Auto-scroll categories
   useEffect(() => {
     const el = categoriesScrollRef.current;

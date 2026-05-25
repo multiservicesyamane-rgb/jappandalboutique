@@ -7,75 +7,80 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { CustomerProvider } from "./contexts/CustomerContext";
-import Home from "./pages/Home";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Categories from "./pages/Categories";
-import CategoryDetail from "./pages/CategoryDetail";
-import Contact from "./pages/Contact";
-import Cart from "./pages/Cart";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminProducts from "./pages/admin/Products";
-import AdminCategories from "./pages/admin/Categories";
-import AdminOrders from "./pages/admin/Orders";
-import AdminCustomers from "./pages/admin/Customers";
-import AdminSettings from "./pages/admin/Settings";
-import AdminStatistics from "./pages/admin/Statistics";
-import AdminAppearance from "./pages/admin/Appearance";
-import AdminAffiliateLinks from "./pages/admin/AffiliateLinks";
-import AdminAdBanners from "./pages/admin/AdBanners";
-import AdminLogin from "./pages/admin/Login";
-import AdminMarketing from "./pages/admin/Marketing";
-import AdminAddProduct from "./pages/admin/AddProduct";
-import CustomerLogin from "./pages/account/Login";
-import CustomerRegister from "./pages/account/Register";
-import CustomerAccount from "./pages/account/Account";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentCancel from "./pages/PaymentCancel";
-import Launch from "./pages/Launch";
+import React, { Suspense } from "react";
+
+// Lazy loading for all pages to split the JavaScript bundle and speed up loading
+const Home = React.lazy(() => import("./pages/Home"));
+const Products = React.lazy(() => import("./pages/Products"));
+const ProductDetail = React.lazy(() => import("./pages/ProductDetail"));
+const Categories = React.lazy(() => import("./pages/Categories"));
+const CategoryDetail = React.lazy(() => import("./pages/CategoryDetail"));
+const Contact = React.lazy(() => import("./pages/Contact"));
+const Cart = React.lazy(() => import("./pages/Cart"));
+const AdminDashboard = React.lazy(() => import("./pages/admin/Dashboard"));
+const AdminProducts = React.lazy(() => import("./pages/admin/Products"));
+const AdminCategories = React.lazy(() => import("./pages/admin/Categories"));
+const AdminOrders = React.lazy(() => import("./pages/admin/Orders"));
+const AdminCustomers = React.lazy(() => import("./pages/admin/Customers"));
+const AdminSettings = React.lazy(() => import("./pages/admin/Settings"));
+const AdminStatistics = React.lazy(() => import("./pages/admin/Statistics"));
+const AdminAppearance = React.lazy(() => import("./pages/admin/Appearance"));
+const AdminAffiliateLinks = React.lazy(() => import("./pages/admin/AffiliateLinks"));
+const AdminAdBanners = React.lazy(() => import("./pages/admin/AdBanners"));
+const AdminLogin = React.lazy(() => import("./pages/admin/Login"));
+const AdminMarketing = React.lazy(() => import("./pages/admin/Marketing"));
+const AdminAddProduct = React.lazy(() => import("./pages/admin/AddProduct"));
+const CustomerLogin = React.lazy(() => import("./pages/account/Login"));
+const CustomerRegister = React.lazy(() => import("./pages/account/Register"));
+const CustomerAccount = React.lazy(() => import("./pages/account/Account"));
+const PaymentSuccess = React.lazy(() => import("./pages/PaymentSuccess"));
+const PaymentCancel = React.lazy(() => import("./pages/PaymentCancel"));
+const Launch = React.lazy(() => import("./pages/Launch"));
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/produits" component={Products} />
-      <Route path="/produits/:id" component={ProductDetail} />
-      <Route path="/categories" component={Categories} />
-      <Route path="/categories/:slug" component={CategoryDetail} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/panier" component={Cart} />
-      <Route path="/paiement-succes" component={PaymentSuccess} />
-      <Route path="/paiement-annule" component={PaymentCancel} />
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#A8D24E]"></div></div>}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/produits" component={Products} />
+        <Route path="/produits/:id" component={ProductDetail} />
+        <Route path="/categories" component={Categories} />
+        <Route path="/categories/:slug" component={CategoryDetail} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/panier" component={Cart} />
+        <Route path="/paiement-succes" component={PaymentSuccess} />
+        <Route path="/paiement-annule" component={PaymentCancel} />
 
-      {/* Espace client */}
-      <Route path="/compte" component={CustomerAccount} />
-      <Route path="/compte/connexion" component={CustomerLogin} />
-      <Route path="/compte/inscription" component={CustomerRegister} />
+        {/* Espace client */}
+        <Route path="/compte" component={CustomerAccount} />
+        <Route path="/compte/connexion" component={CustomerLogin} />
+        <Route path="/compte/inscription" component={CustomerRegister} />
 
-      {/* Page de lancement */}
-      <Route path="/lancement" component={Launch} />
+        {/* Page de lancement */}
+        <Route path="/lancement" component={Launch} />
 
-      {/* Admin Login */}
-      <Route path="/yamanetech/login" component={AdminLogin} />
-      <Route path="/admin/login" component={AdminLogin} />
+        {/* Admin Login */}
+        <Route path="/yamanetech/login" component={AdminLogin} />
+        <Route path="/admin/login" component={AdminLogin} />
 
-      {/* Admin Routes */}
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/produits" component={AdminProducts} />
-      <Route path="/admin/produits/ajouter" component={AdminAddProduct} />
-      <Route path="/admin/categories" component={AdminCategories} />
-      <Route path="/admin/commandes" component={AdminOrders} />
-      <Route path="/admin/clients" component={AdminCustomers} />
-      <Route path="/admin/parametres" component={AdminSettings} />
-      <Route path="/admin/statistiques" component={AdminStatistics} />
-      <Route path="/admin/liens-affilies" component={AdminAffiliateLinks} />
-      <Route path="/admin/bannieres-pub" component={AdminAdBanners} />
-      <Route path="/admin/apparence" component={AdminAppearance} />
-      <Route path="/admin/marketing" component={AdminMarketing} />
+        {/* Admin Routes */}
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/produits" component={AdminProducts} />
+        <Route path="/admin/produits/ajouter" component={AdminAddProduct} />
+        <Route path="/admin/categories" component={AdminCategories} />
+        <Route path="/admin/commandes" component={AdminOrders} />
+        <Route path="/admin/clients" component={AdminCustomers} />
+        <Route path="/admin/parametres" component={AdminSettings} />
+        <Route path="/admin/statistiques" component={AdminStatistics} />
+        <Route path="/admin/liens-affilies" component={AdminAffiliateLinks} />
+        <Route path="/admin/bannieres-pub" component={AdminAdBanners} />
+        <Route path="/admin/apparence" component={AdminAppearance} />
+        <Route path="/admin/marketing" component={AdminMarketing} />
 
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
