@@ -6,7 +6,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ShoppingCart, Phone, MessageCircle,
   Minus, Plus, Check, Share2, Truck, ShieldCheck, ChevronRight,
@@ -27,6 +27,10 @@ export default function ProductDetail() {
   const [justAdded, setJustAdded] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [productId]);
 
   const { data: product, isLoading } = trpc.products.getById.useQuery({ id: productId });
   const { data: allProducts } = trpc.products.list.useQuery();

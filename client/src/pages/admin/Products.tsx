@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,7 @@ import {
   ImageIcon,
   X,
   Crop,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,6 +46,8 @@ export default function AdminProducts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -92,9 +95,19 @@ export default function AdminProducts() {
   });
   const uploadImage = trpc.products.uploadImage.useMutation();
 
-  const filteredProducts = products?.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = useMemo(() => {
+    return products?.filter((p) => {
+      if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (categoryFilter !== "all" && p.categoryId.toString() !== categoryFilter) return false;
+      if (stockFilter === "in_stock" && p.inStock === 0) return false;
+      if (stockFilter === "out_of_stock" && p.inStock > 0) return false;
+      if (stockFilter === "low_stock" && (p.inStock === 0 || p.inStock > 5)) return false;
+      return true;
+    });
+  }, [products, searchQuery, categoryFilter, stockFilter]);
+
+  const lowStockCount = products?.filter((p) => p.inStock > 0 && p.inStock <= 5).length || 0;
+  const outOfStockCount = products?.filter((p) => p.inStock === 0).length || 0;
 
   const openDialog = (product?: any) => {
     if (product) {
@@ -261,26 +274,86 @@ export default function AdminProducts() {
   return (
     <AdminLayout
       title="Produits"
-      subtitle={`${products?.length || 0} produit${(products?.length || 0) !== 1 ? "s" : ""} au total`}
+      subtitle={`${products?.length || 0} produit${(products?.length || 0) !== 1 ? "s" : ""} · ${outOfStockCount} rupture${outOfStockCount !== 1 ? "s" : ""}`}
     >
-      {/* Top actions */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Rechercher un produit..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-white"
-          />
+      {/* Stock alerts */}
+      {(lowStockCount > 0 || outOfStockCount > 0) && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {outOfStockCount > 0 && (
+            <button
+              onClick={() => setStockFilter(stockFilter === "out_of_stock" ? "all" : "out_of_stock")}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                stockFilter === "out_of_stock"
+                  ? "bg-red-500 text-white border-red-500"
+                  : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+              }`}
+            >
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {outOfStockCount} en rupture
+            </button>
+          )}
+          {lowStockCount > 0 && (
+            <button
+              onClick={() => setStockFilter(stockFilter === "low_stock" ? "all" : "low_stock")}
+              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                stockFilter === "low_stock"
+                  ? "bg-amber-500 text-white border-amber-500"
+                  : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+              }`}
+            >
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {lowStockCount} stock faible (≤5)
+            </button>
+          )}
         </div>
-        <Button
-          onClick={() => openDialog()}
-          className="bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white shrink-0"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter
-        </Button>
+      )}
+
+      {/* Top actions */}
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Rechercher un produit..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-white"
+            />
+          </div>
+          <Button
+            onClick={() => openDialog()}
+            className="bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white shrink-0"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+            <SelectTrigger className="w-full sm:w-[180px] bg-white h-9 text-sm">
+              <SelectValue placeholder="Catégorie" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les catégories</SelectItem>
+              {categories?.map((c) => (
+                <SelectItem key={c.id} value={c.id.toString()}>
+                  {c.emoji} {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={stockFilter} onValueChange={(v) => setStockFilter(v)}>
+            <SelectTrigger className="w-full sm:w-[160px] bg-white h-9 text-sm">
+              <SelectValue placeholder="Stock" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les stocks</SelectItem>
+              <SelectItem value="in_stock">En stock</SelectItem>
+              <SelectItem value="low_stock">Stock faible (≤5)</SelectItem>
+              <SelectItem value="out_of_stock">Rupture</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Products grid */}
@@ -384,10 +457,17 @@ export default function AdminProducts() {
                           )}
                         </td>
                         <td className="py-3 px-4">
-                          {product.inStock > 0 ? (
-                            <Badge className="bg-blue-100 text-blue-700 text-xs">En stock</Badge>
+                          {product.inStock === 0 ? (
+                            <Badge className="bg-red-100 text-red-700 text-xs border border-red-200">Rupture</Badge>
+                          ) : product.inStock <= 5 ? (
+                            <Badge className="bg-amber-100 text-amber-700 text-xs border border-amber-200">
+                              <AlertTriangle className="h-2.5 w-2.5 mr-1" />
+                              {product.inStock} restant{product.inStock > 1 ? "s" : ""}
+                            </Badge>
                           ) : (
-                            <Badge className="bg-red-100 text-red-700 text-xs">Rupture</Badge>
+                            <Badge className="bg-green-100 text-green-700 text-xs border border-green-200">
+                              En stock ({product.inStock})
+                            </Badge>
                           )}
                         </td>
                         <td className="py-3 px-4 text-right">

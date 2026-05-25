@@ -8,6 +8,13 @@
       "when": 1779479091311,
       "tag": "0000_wide_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779705587583,
+      "tag": "0001_fearless_spyke",
+      "breakpoints": true
     }
   ]
 }

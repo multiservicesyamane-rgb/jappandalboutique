@@ -8,6 +8,10 @@ import * as db from "./db";
 import { storagePut } from "./storage";
 import { initiatePayTechPayment, checkPayTechPaymentStatus } from "./paytech";
 import { verifyAdminCredentials, createSessionToken } from "./_core/auth";
+import {
+  hashPassword, verifyPassword, createCustomerToken,
+  authenticateCustomer, getCustomerCookieHeader, clearCustomerCookieHeader,
+} from "./_core/customerAuth";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -129,6 +133,7 @@ export const appRouter = router({
         image3Url: z.string().optional(),
         image4Url: z.string().optional(),
         image5Url: z.string().optional(),
+        videoUrl: z.string().optional(),
         categoryId: z.number(),
         badge: z.string().optional(),
         inStock: z.number().optional(),
@@ -149,6 +154,7 @@ export const appRouter = router({
         image3Url: z.string().optional(),
         image4Url: z.string().optional(),
         image5Url: z.string().optional(),
+        videoUrl: z.string().optional(),
         categoryId: z.number().optional(),
         badge: z.string().optional(),
         inStock: z.number().optional(),
@@ -662,6 +668,81 @@ export const appRouter = router({
       .input(z.object({ token: z.string() }))
       .query(async ({ input }) => {
         return await checkPayTechPaymentStatus(input.token);
+      }),
+  }),
+
+  customerAuth: router({
+    register: publicProcedure
+      .input(z.object({
+        name: z.string().min(2, "Le nom doit avoir au moins 2 caractères"),
+        phone: z.string().min(8, "Numéro invalide"),
+        email: z.string().email("Email invalide").optional(),
+        password: z.string().min(6, "Le mot de passe doit avoir au moins 6 caractères"),
+        address: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const existing = await db.getCustomerByPhone(input.phone);
+        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Ce numéro est déjà utilisé. Veuillez vous connecter." });
+        const passwordHash = await hashPassword(input.password);
+        await db.createCustomer({ name: input.name, phone: input.phone, email: input.email, address: input.address, passwordHash });
+        const customer = await db.getCustomerByPhone(input.phone);
+        if (!customer) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur création compte" });
+        const token = await createCustomerToken(customer.id, customer.phone, customer.name);
+        (ctx.res as any).setHeader("Set-Cookie", getCustomerCookieHeader(token));
+        return { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email };
+      }),
+
+    login: publicProcedure
+      .input(z.object({
+        phone: z.string().min(8),
+        password: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const customer = await db.getCustomerByPhone(input.phone);
+        if (!customer || !customer.passwordHash) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Numéro ou mot de passe incorrect" });
+        }
+        const valid = await verifyPassword(input.password, customer.passwordHash);
+        if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Numéro ou mot de passe incorrect" });
+        const token = await createCustomerToken(customer.id, customer.phone, customer.name);
+        (ctx.res as any).setHeader("Set-Cookie", getCustomerCookieHeader(token));
+        return { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email };
+      }),
+
+    logout: publicProcedure.mutation(({ ctx }) => {
+      (ctx.res as any).setHeader("Set-Cookie", clearCustomerCookieHeader());
+      return { success: true };
+    }),
+
+    me: publicProcedure.query(async ({ ctx }) => {
+      return await authenticateCustomer(ctx.req as any);
+    }),
+
+    myOrders: publicProcedure.query(async ({ ctx }) => {
+      const customer = await authenticateCustomer(ctx.req as any);
+      if (!customer) return [];
+      const byId = await db.getCustomerOrders(customer.id);
+      const byPhone = await db.getOrdersByPhone(customer.phone);
+      const seen = new Set<number>();
+      const merged = [...byId, ...byPhone].filter(o => {
+        if (seen.has(o.id)) return false;
+        seen.add(o.id);
+        return true;
+      }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return merged;
+    }),
+
+    updateProfile: publicProcedure
+      .input(z.object({
+        name: z.string().min(2).optional(),
+        email: z.string().email().optional(),
+        address: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const customer = await authenticateCustomer(ctx.req as any);
+        if (!customer) throw new TRPCError({ code: "UNAUTHORIZED", message: "Non connecté" });
+        await db.updateCustomer(customer.id, input);
+        return { success: true };
       }),
   }),
 });

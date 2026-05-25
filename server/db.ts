@@ -273,6 +273,19 @@ export async function getCustomerByPhone(phone: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getCustomerByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(customers).where(eq(customers.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getOrdersByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(orders).where(eq(orders.customerPhone, phone)).orderBy(desc(orders.createdAt));
+}
+
 export async function createCustomer(customer: InsertCustomer) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

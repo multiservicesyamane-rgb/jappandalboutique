@@ -2,18 +2,20 @@ import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import {
   Menu, X, Search, ShoppingCart, LayoutDashboard,
-  Home, Package, Grid3X3, Phone, Zap
+  Home, Package, Grid3X3, Phone, Zap, User, UserCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useCustomer } from "@/contexts/CustomerContext";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
+  const { customer } = useCustomer();
   const { totalItems } = useCart();
   const settings = useSettings();
   const isAdmin = user?.role === "admin";
@@ -86,6 +88,23 @@ export function Header() {
                 <Search className="h-5 w-5" />
               </button>
 
+              {/* Compte client */}
+              <Link href={customer ? "/compte" : "/compte/connexion"}>
+                {customer ? (
+                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-white/15 transition-colors cursor-pointer" title={customer.name}>
+                    <UserCheck className="h-5 w-5 text-[#A8D24E]" style={{ filter: "drop-shadow(0 0 4px rgba(168,210,78,0.6))" }} />
+                    <span className="hidden sm:block text-xs font-semibold text-[#A8D24E] max-w-[80px] truncate">
+                      {customer.name.split(" ")[0]}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-white/30 hover:bg-white/15 transition-colors cursor-pointer">
+                    <User className="h-4 w-4" />
+                    <span className="text-xs font-semibold hidden sm:block">Connexion</span>
+                  </div>
+                )}
+              </Link>
+
               <Link href="/panier">
                 <div className="relative p-2 hover:bg-white/15 rounded-full transition-colors">
                   <ShoppingCart className="h-5 w-5" />
@@ -140,6 +159,7 @@ export function Header() {
               { href: "/produits", label: "Nos Produits" },
               { href: "/categories", label: "Catégories" },
               { href: "/contact", label: "Contact" },
+              { href: "/compte", label: customer ? `👤 ${customer.name.split(" ")[0]}` : "Mon Compte" },
             ].map(({ href, label }) => (
               <Link key={href} href={href}>
                 <span className={`text-sm font-medium transition-all duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#A8D24E] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 ${
@@ -196,6 +216,20 @@ export function Header() {
                       {totalItems}
                     </span>
                   )}
+                </div>
+              </Link>
+
+              <Link href={customer ? "/compte" : "/compte/connexion"} onClick={() => setMobileMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  location.startsWith("/compte")
+                    ? "bg-[#A8D24E]/10 text-[#5a8e1e] shadow-sm"
+                    : customer
+                    ? "text-gray-700 hover:bg-gray-50"
+                    : "bg-[#1E5A8E] text-white"
+                }`}>
+                  {customer ? <UserCheck className="h-5 w-5 text-[#A8D24E]" /> : <User className="h-5 w-5" />}
+                  <span className="font-medium">{customer ? customer.name : "Se connecter / Créer un compte"}</span>
+                  {customer && <span className="ml-auto text-xs bg-[#A8D24E]/15 text-[#A8D24E] px-2 py-0.5 rounded-full font-semibold">Connecté</span>}
                 </div>
               </Link>
 

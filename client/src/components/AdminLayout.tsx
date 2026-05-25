@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   ExternalLink,
   Image,
+  MessageSquare,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -37,6 +38,7 @@ const navItems = [
   { href: "/admin/commandes", label: "Commandes", icon: ShoppingCart, section: "GENERAL" },
   { href: "/admin/clients", label: "Clients", icon: Users, section: "GENERAL" },
   { href: "/admin/statistiques", label: "Statistiques", icon: BarChart3, section: "OUTILS" },
+  { href: "/admin/marketing", label: "Marketing", icon: MessageSquare, section: "OUTILS" },
   { href: "/admin/liens-affilies", label: "Liens Affiliés", icon: ExternalLink, section: "MONÉTISATION" },
   { href: "/admin/bannieres-pub", label: "Bannières Pub", icon: Image, section: "MONÉTISATION" },
   { href: "/admin/apparence", label: "Apparence", icon: Palette, section: "OUTILS" },
