@@ -139,16 +139,19 @@ export default function ProductDetail() {
           </div>
 
           {/* Image principale */}
-          <div className="aspect-square relative overflow-hidden">
+          <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-[#F5E6D3] via-[#E8D4B4] to-[#CBA568]">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent pointer-events-none"></div>
             {images.length > 0 ? (
               <img
                 src={images[selectedImageIndex]}
                 alt={product.name}
-                className="w-full h-full object-contain p-2"
+                className="w-full h-full object-contain p-4 drop-shadow-2xl relative z-10"
                 onClick={() => setIsZoomed(true)}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-7xl bg-gray-100">🛒</div>
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center relative z-10">
+                <span className="text-2xl font-black text-[#6B4423]/80 uppercase tracking-wide leading-tight">{product.name}</span>
+              </div>
             )}
             {product.badge && (
               <span className="absolute bottom-3 left-3 bg-[#A8D24E] text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -175,8 +178,8 @@ export default function ProductDetail() {
             <div className="flex gap-2 px-3 py-2 overflow-x-auto scrollbar-hide">
               {images.map((img, i) => (
                 <button key={i} onClick={() => setSelectedImageIndex(i)}
-                  className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === selectedImageIndex ? "border-[#1E5A8E]" : "border-gray-200 opacity-60"}`}>
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all bg-gradient-to-br from-[#F5E6D3] to-[#CBA568] ${i === selectedImageIndex ? "border-[#1E5A8E]" : "border-transparent opacity-70"}`}>
+                  <img src={img} alt="" className="w-full h-full object-contain p-1" />
                 </button>
               ))}
             </div>
@@ -304,12 +307,13 @@ export default function ProductDetail() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Image */}
             <div className="space-y-3">
-              <div className="bg-white rounded-xl overflow-hidden border shadow-sm relative group">
-                <div className="aspect-square relative">
+              <div className="bg-gradient-to-br from-[#F5E6D3] via-[#E8D4B4] to-[#CBA568] rounded-xl overflow-hidden border shadow-sm relative group">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent pointer-events-none"></div>
+                <div className="aspect-square relative z-10">
                   {images.length > 0 ? (
-                    <img src={images[selectedImageIndex]} alt={product.name} className="w-full h-full object-contain p-4 cursor-zoom-in" onClick={() => setIsZoomed(true)} />
+                    <img src={images[selectedImageIndex]} alt={product.name} className="w-full h-full object-contain p-8 drop-shadow-2xl cursor-zoom-in" onClick={() => setIsZoomed(true)} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-8xl bg-gray-100">🛒</div>
+                    <div className="w-full h-full flex items-center justify-center p-8 text-center"><span className="text-3xl font-black text-[#6B4423]/80 uppercase tracking-widest">{product.name}</span></div>
                   )}
                   {product.badge && (
                     <span className="absolute top-3 left-3 bg-[#A8D24E] text-white text-xs font-bold px-3 py-1 rounded-full">{product.badge}</span>
@@ -343,9 +347,9 @@ export default function ProductDetail() {
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   {images.map((img, i) => (
                     <button key={i} onClick={() => setSelectedImageIndex(i)}
-                      className={`flex-shrink-0 rounded-lg overflow-hidden transition-all ${i === selectedImageIndex ? "ring-2 ring-[#1E5A8E] ring-offset-2" : "border-2 border-gray-200 opacity-60 hover:opacity-100"}`}
+                      className={`flex-shrink-0 rounded-lg overflow-hidden transition-all bg-gradient-to-br from-[#F5E6D3] to-[#CBA568] ${i === selectedImageIndex ? "ring-2 ring-[#1E5A8E] ring-offset-2" : "opacity-70 hover:opacity-100"}`}
                       style={{ width: 80, height: 80 }}>
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={img} alt="" className="w-full h-full object-contain p-1" />
                     </button>
                   ))}
                 </div>

@@ -230,15 +230,15 @@ async function seedEpicesAndCategories() {
       .where(eq(schema.products.name, product.name))
       .limit(1);
     
-    // Générer une image par défaut avec le nom du produit (fond vert, texte blanc)
-    const defaultImageUrl = `https://placehold.co/400x400/A8D24E/ffffff?text=${encodeURIComponent(product.name)}`;
-    const productWithImage = { ...product, imageUrl: defaultImageUrl };
+    // On n'utilise plus placehold.co pour laisser le beau fond doré transparent s'afficher !
 
     if (existingProduct.length === 0) {
-      await db.insert(schema.products).values(productWithImage);
+      await db.insert(schema.products).values(product);
     } else {
-      // Mettre à jour l'image si le produit existe déjà
-      await db.update(schema.products).set({ imageUrl: defaultImageUrl }).where(eq(schema.products.id, existingProduct[0].id));
+      // Effacer l'image si c'était le vieux carré vert, pour forcer l'affichage du nouveau fond
+      if (existingProduct[0].imageUrl?.includes('placehold.co')) {
+        await db.update(schema.products).set({ imageUrl: null }).where(eq(schema.products.id, existingProduct[0].id));
+      }
     }
   }
 

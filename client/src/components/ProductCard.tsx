@@ -44,17 +44,22 @@ export function ProductCard({
     <Link href={`/produits/${id}`} className="block h-full">
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden card-hover-glow group cursor-pointer h-full flex flex-col">
         {/* Image */}
-        <div className={`relative bg-gray-50 overflow-hidden ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
+        <div className={`relative overflow-hidden bg-gradient-to-br from-[#F5E6D3] via-[#E8D4B4] to-[#CBA568] ${compact ? "aspect-square" : "aspect-[4/3]"}`}>
+          {/* Subtle light effect overlaid */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent pointer-events-none"></div>
+          
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={name}
-              className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-400"
+              className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500 drop-shadow-xl relative z-10"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-gray-50 to-gray-100">
-              🛒
+            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center relative z-10">
+              <span className="text-sm font-black text-[#6B4423]/80 uppercase tracking-wide leading-tight">
+                {name}
+              </span>
             </div>
           )}
 
