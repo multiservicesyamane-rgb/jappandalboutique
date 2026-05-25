@@ -185,6 +185,10 @@ export default function AdBanners() {
                         <SelectItem value="homepage_sidebar">Homepage - Sidebar</SelectItem>
                         <SelectItem value="homepage_middle">Homepage - Milieu</SelectItem>
                         <SelectItem value="homepage_bottom">Homepage - Bas</SelectItem>
+                        <SelectItem value="homepage_floating">🎬 Homepage - Flottant (vidéo/GIF)</SelectItem>
+                        <SelectItem value="launch_top">Page Lancement - Haut</SelectItem>
+                        <SelectItem value="launch_middle">Page Lancement - Milieu</SelectItem>
+                        <SelectItem value="launch_floating">🎬 Page Lancement - Flottant (vidéo/GIF)</SelectItem>
                         <SelectItem value="products_top">Produits - Haut</SelectItem>
                         <SelectItem value="products_sidebar">Produits - Sidebar</SelectItem>
                         <SelectItem value="product_detail_top">Détail Produit - Haut</SelectItem>

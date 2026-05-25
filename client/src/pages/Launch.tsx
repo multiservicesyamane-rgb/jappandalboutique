@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { AdBanner } from "@/components/AdBanner";
 import { playNotificationSound } from "@/lib/playNotificationSound";
 import { toast } from "sonner";
 import {
@@ -114,6 +115,13 @@ export default function Launch() {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          <span
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black"
+            style={{ background: "rgba(168,210,78,0.15)", border: "1px solid rgba(168,210,78,0.5)", color: "#A8D24E", boxShadow: "0 0 10px rgba(168,210,78,0.2)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A8D24E] animate-pulse" />
+            BOUTIQUE OUVERTE
+          </span>
           <Link href="/">
             <span className="hidden sm:block text-xs text-white/60 hover:text-white cursor-pointer transition-colors">Accueil</span>
           </Link>
@@ -138,6 +146,11 @@ export default function Launch() {
           Lancement officiel — Livraison express à Dakar & banlieue — Commandez maintenant !
           <Zap className="h-3.5 w-3.5 animate-pulse flex-shrink-0" />
         </p>
+      </div>
+
+      {/* ── PUB HAUT (vidéo / GIF / image) — configurée via Admin › Publicités ── */}
+      <div className="relative z-10 px-4 pt-4 max-w-4xl mx-auto w-full">
+        <AdBanner position="launch_top" />
       </div>
 
       {/* ── PRODUITS EN VEDETTE (PREMIER) ── */}
@@ -351,6 +364,11 @@ export default function Launch() {
         </div>
       </section>
 
+      {/* ── PUB MILIEU (vidéo / GIF / image) ── */}
+      <div className="relative z-10 px-4 max-w-4xl mx-auto w-full">
+        <AdBanner position="launch_middle" />
+      </div>
+
       {/* ── HERO / STATS ── */}
       <section className="relative z-10 py-14 sm:py-20 px-4 text-center overflow-hidden border-t border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_50%,rgba(30,90,142,0.25),transparent_70%)]" />
@@ -533,6 +551,28 @@ export default function Launch() {
           </div>
         </div>
       </footer>
+
+      {/* 🟢 Boutique Ouverte — Strip flottant premium */}
+      <div className="fixed bottom-[88px] md:bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-none select-none">
+        <div
+          className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black whitespace-nowrap"
+          style={{
+            background: "rgba(6,18,6,0.93)",
+            backdropFilter: "blur(14px)",
+            border: "1px solid rgba(168,210,78,0.6)",
+            color: "#A8D24E",
+            boxShadow: "0 0 20px rgba(168,210,78,0.28), 0 4px 14px rgba(0,0,0,0.55)",
+          }}
+        >
+          <span className="w-2 h-2 rounded-full bg-[#A8D24E] animate-pulse flex-shrink-0" />
+          🛍️ BOUTIQUE OUVERTE · Livraison 7j/7 · Dakar
+        </div>
+      </div>
+
+      {/* 📺 Pub flottante — configurée via Admin › Publicités (position : launch_floating) */}
+      <div className="hidden md:block fixed bottom-24 left-6 z-30 max-w-[220px] rounded-2xl overflow-hidden shadow-2xl">
+        <AdBanner position="launch_floating" />
+      </div>
 
       {/* WhatsApp flottant */}
       <a

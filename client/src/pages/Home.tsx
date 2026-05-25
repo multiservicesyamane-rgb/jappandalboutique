@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   ChevronRight, Truck, ShieldCheck,
   Clock, BadgePercent, ShoppingBag, MessageCircle,
-  ShoppingCart, Check, Flame, Star, Zap
+  ShoppingCart, Check, Star, Zap
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -160,7 +160,14 @@ export default function Home() {
         <div className="container py-4 sm:py-5 md:py-8 relative z-10">
           <div className="flex items-center gap-3 md:gap-6">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-black"
+                  style={{ background: "rgba(168,210,78,0.18)", border: "1px solid rgba(168,210,78,0.6)", color: "#A8D24E", boxShadow: "0 0 10px rgba(168,210,78,0.25)" }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#A8D24E] animate-pulse flex-shrink-0" />
+                  🛍️ BOUTIQUE OUVERTE
+                </span>
                 <span className="badge-flash text-white text-[9px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-0.5">
                   <Zap className="h-2.5 w-2.5" /> LIVE
                 </span>
@@ -261,6 +268,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── BANDE PROMO ANIMÉE ─── */}
+      <div className="bg-gradient-to-r from-[#061406] via-[#0D3B0D] to-[#061406] border-y border-[#A8D24E]/25 overflow-hidden">
+        <div className="advantages-ticker py-2">
+          <div className="advantages-ticker-track">
+            {[
+              "🛍️ BOUTIQUE OUVERTE",
+              "🚀 Livraison Express 24h à Dakar",
+              "🐏 Packs Tabaski disponibles",
+              "💚 Produits 100% frais & sains",
+              "📦 500+ produits en stock",
+              "🇸🇳 GIE des Jeunes Conscients",
+              "🎁 Commandes personnalisées",
+              "📞 Service client 7j/7",
+              "🛍️ BOUTIQUE OUVERTE",
+              "🚀 Livraison Express 24h à Dakar",
+              "🐏 Packs Tabaski disponibles",
+              "💚 Produits 100% frais & sains",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 px-4 sm:px-6 whitespace-nowrap">
+                <span className="text-[#A8D24E] text-[10px] sm:text-xs font-black">{item}</span>
+                <span className="text-[#A8D24E]/30 text-xs">·</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* ─── BANNIÈRE PUB HAUT ─── */}
       <AdBanner position="homepage_top" className="container mt-2 mb-0" />
 
@@ -315,7 +349,7 @@ export default function Home() {
 
             {/* Horizontal Product List */}
             <div className="flex overflow-x-auto gap-2.5 sm:gap-3 -mx-4 px-4 md:mx-0 md:px-0 pb-2 scrollbar-hide">
-              {tabaskiProducts.map((product, index) => {
+              {tabaskiProducts.map((product) => {
                 const formattedPrice = parseFloat(product.price).toLocaleString("fr-FR");
                 const originalPrice = getOriginalPrice(product.price);
                 const discount = getDiscountPercent(product.price);
@@ -513,6 +547,28 @@ export default function Home() {
           <MessageCircle className="h-7 w-7 text-white" />
         </div>
       </a>
+
+      {/* 🟢 Boutique Ouverte — Strip flottant premium */}
+      <div className="fixed bottom-[88px] md:bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none select-none">
+        <div
+          className="flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-black whitespace-nowrap"
+          style={{
+            background: "rgba(6,18,6,0.93)",
+            backdropFilter: "blur(14px)",
+            border: "1px solid rgba(168,210,78,0.6)",
+            color: "#A8D24E",
+            boxShadow: "0 0 20px rgba(168,210,78,0.28), 0 4px 14px rgba(0,0,0,0.55)",
+          }}
+        >
+          <span className="w-2 h-2 rounded-full bg-[#A8D24E] animate-pulse flex-shrink-0" />
+          🛍️ BOUTIQUE OUVERTE · Livraison 7j/7 · Dakar
+        </div>
+      </div>
+
+      {/* 📺 Pub flottante vidéo/GIF — configurée via Admin › Publicités (position : homepage_floating) */}
+      <div className="hidden md:block fixed bottom-24 left-6 z-30 max-w-[220px] rounded-2xl overflow-hidden shadow-2xl">
+        <AdBanner position="homepage_floating" />
+      </div>
     </div>
   );
 }
