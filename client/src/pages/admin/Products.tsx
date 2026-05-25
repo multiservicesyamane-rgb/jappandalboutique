@@ -35,6 +35,7 @@ import {
   AlertTriangle,
   ToggleLeft,
   ToggleRight,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,7 +79,7 @@ export default function AdminProducts() {
   });
   const createProduct = trpc.products.create.useMutation({
     onSuccess: () => {
-      utils.products.list.invalidate();
+      utils.products.listAdmin.invalidate();
       toast.success("Produit créé avec succès");
       closeDialog();
     },
@@ -86,7 +87,7 @@ export default function AdminProducts() {
   });
   const updateProduct = trpc.products.update.useMutation({
     onSuccess: () => {
-      utils.products.list.invalidate();
+      utils.products.listAdmin.invalidate();
       toast.success("Produit mis à jour");
       closeDialog();
     },
@@ -94,7 +95,7 @@ export default function AdminProducts() {
   });
   const deleteProduct = trpc.products.delete.useMutation({
     onSuccess: () => {
-      utils.products.list.invalidate();
+      utils.products.listAdmin.invalidate();
       toast.success("Produit supprimé");
     },
     onError: (error) => toast.error(`Erreur: ${error.message}`),
@@ -116,7 +117,6 @@ export default function AdminProducts() {
 
   const activeCount = products?.filter((p) => p.inStock !== -1).length || 0;
   const inactiveCount = products?.filter((p) => p.inStock === -1).length || 0;
-  const lowStockCount = products?.filter((p) => p.inStock > 0 && p.inStock <= 5).length || 0;
   const outOfStockCount = products?.filter((p) => p.inStock === 0).length || 0;
 
   const openDialog = (product?: any) => {
@@ -286,50 +286,6 @@ export default function AdminProducts() {
       title="Produits"
       subtitle={`${activeCount} actif${activeCount !== 1 ? "s" : ""} · ${inactiveCount} désactivé${inactiveCount !== 1 ? "s" : ""} · ${outOfStockCount} rupture${outOfStockCount !== 1 ? "s" : ""}`}
     >
-      {/* Stock alerts */}
-      {(lowStockCount > 0 || outOfStockCount > 0 || inactiveCount > 0) && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {inactiveCount > 0 && (
-            <button
-              onClick={() => setStockFilter(stockFilter === "inactive" ? "all" : "inactive")}
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                stockFilter === "inactive"
-                  ? "bg-gray-600 text-white border-gray-600"
-                  : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
-              }`}
-            >
-              <ToggleLeft className="h-3.5 w-3.5" />
-              {inactiveCount} désactivé{inactiveCount !== 1 ? "s" : ""}
-            </button>
-          )}
-          {outOfStockCount > 0 && (
-            <button
-              onClick={() => setStockFilter(stockFilter === "out_of_stock" ? "all" : "out_of_stock")}
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                stockFilter === "out_of_stock"
-                  ? "bg-red-500 text-white border-red-500"
-                  : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-              }`}
-            >
-              <AlertTriangle className="h-3.5 w-3.5" />
-              {outOfStockCount} en rupture
-            </button>
-          )}
-          {lowStockCount > 0 && (
-            <button
-              onClick={() => setStockFilter(stockFilter === "low_stock" ? "all" : "low_stock")}
-              className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                stockFilter === "low_stock"
-                  ? "bg-amber-500 text-white border-amber-500"
-                  : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-              }`}
-            >
-              <AlertTriangle className="h-3.5 w-3.5" />
-              {lowStockCount} stock faible (≤5)
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Top actions */}
       <div className="flex flex-col gap-3 mb-4">
@@ -343,6 +299,14 @@ export default function AdminProducts() {
               className="pl-9 bg-white"
             />
           </div>
+          <Button
+            variant="outline"
+            onClick={() => utils.products.listAdmin.invalidate()}
+            className="shrink-0 gap-1.5"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Actualiser
+          </Button>
           <Button
             onClick={() => openDialog()}
             className="bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white shrink-0"
@@ -665,20 +629,18 @@ export default function AdminProducts() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="inStock" className="text-xs font-medium">
-                  Disponibilité *
+                  Quantité en stock *
                 </Label>
-                <Select
-                  value={formData.inStock}
-                  onValueChange={(value) => setFormData({ ...formData, inStock: value })}
-                >
-                  <SelectTrigger className="h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">En stock</SelectItem>
-                    <SelectItem value="0">Rupture de stock</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="inStock"
+                  type="number"
+                  min="0"
+                  placeholder="Ex: 50"
+                  value={formData.inStock === "-1" ? "0" : formData.inStock}
+                  onChange={(e) => setFormData({ ...formData, inStock: e.target.value })}
+                  className="h-10"
+                />
+                <p className="text-[10px] text-gray-400">0 = rupture de stock</p>
               </div>
             </div>
 
