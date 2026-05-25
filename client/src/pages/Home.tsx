@@ -45,7 +45,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-40 h-40 glow-orb bg-[#1E5A8E] opacity-25 pointer-events-none" />
         <div className="absolute top-1/2 left-1/3 w-24 h-24 glow-orb bg-[#25D366] opacity-15 pointer-events-none" />
 
-        <div className="container py-4 sm:py-5 md:py-8 relative z-10">
+        <div className="container py-2 sm:py-3 relative z-10">
           <div className="flex items-center gap-3 md:gap-6">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -91,7 +91,7 @@ export default function Home() {
               <img
                 src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
                 alt={settings.shopName}
-                className="relative h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 rounded-full border-2 border-[#A8D24E]/50 object-cover shadow-xl"
+                className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full border-2 border-[#A8D24E]/50 object-cover shadow-xl"
                 style={{ boxShadow: "0 0 20px rgba(168,210,78,0.4), 0 0 40px rgba(30,90,142,0.2)" }}
               />
             </div>
@@ -99,44 +99,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── CATEGORIES: small round circles, auto-scroll ─── */}
-      <section className="bg-white border-b">
-        <div className="py-2 sm:py-3">
-          <div
-            ref={categoriesScrollRef}
-            className="flex overflow-x-auto gap-3 sm:gap-4 px-3 sm:px-4 scrollbar-hide"
-          >
-            {/* "Tout voir" pill */}
-            <Link href="/categories">
-              <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1E5A8E] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <span className="text-[9px] sm:text-[10px] font-bold text-[#1E5A8E] leading-tight text-center">Tout voir</span>
-              </div>
-            </Link>
-            {categoriesLoading
-              ? [...Array(6)].map((_, i) => (
-                  <div key={i} className="flex-shrink-0 flex flex-col items-center gap-1 w-14 sm:w-16 animate-pulse">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200" />
-                    <div className="h-2 bg-gray-200 rounded w-10" />
-                  </div>
-                ))
-              : categories?.map((cat) => (
-                  <Link key={cat.id} href={`/categories/${cat.slug}`}>
-                    <div className="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer group w-14 sm:w-16">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-center justify-center group-hover:border-[#1E5A8E]/40 group-hover:shadow-md transition-all group-hover:scale-105">
-                        <span className="text-lg sm:text-xl">{cat.emoji || "📦"}</span>
-                      </div>
-                      <span className="text-[9px] sm:text-[10px] font-semibold text-gray-600 group-hover:text-[#1E5A8E] leading-tight text-center line-clamp-1 w-full">
-                        {cat.name}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-          </div>
-        </div>
-      </section>
+
 
 
 
