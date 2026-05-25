@@ -37,8 +37,8 @@ export default function CustomerLogin() {
   });
 
   useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-    if (!clientId) return;
+    const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined)
+      || "15652791885-snloubrn7gpu23vhh7g9ob9g2t9gah2p.apps.googleusercontent.com";
 
     const initGoogle = () => {
       if (!window.google || !googleBtnRef.current) return;
@@ -177,24 +177,20 @@ export default function CustomerLogin() {
             </form>
 
             {/* Google Sign-In */}
-            {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
-              <>
-                <div className="flex items-center gap-3 my-5">
-                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
-                  <span className="text-xs text-white/30 shrink-0">ou continuer avec</span>
-                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+              <span className="text-xs text-white/30 shrink-0">ou continuer avec</span>
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+            </div>
+            <div className="flex justify-center">
+              {googleLogin.isPending ? (
+                <div className="flex items-center gap-2 text-white/50 text-sm py-3">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Connexion Google...
                 </div>
-                <div className="flex justify-center">
-                  {googleLogin.isPending ? (
-                    <div className="flex items-center gap-2 text-white/50 text-sm py-3">
-                      <Loader2 className="h-4 w-4 animate-spin" /> Connexion Google...
-                    </div>
-                  ) : (
-                    <div ref={googleBtnRef} className="w-full" />
-                  )}
-                </div>
-              </>
-            )}
+              ) : (
+                <div ref={googleBtnRef} className="w-full" />
+              )}
+            </div>
 
             {/* Register link */}
             <div className="mt-6 text-center">
