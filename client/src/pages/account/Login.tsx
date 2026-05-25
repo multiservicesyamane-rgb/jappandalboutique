@@ -1,10 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Header } from "@/components/Header";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Phone, Lock, Eye, EyeOff, LogIn, UserPlus, ShoppingBag, Loader2 } from "lucide-react";
+import { Phone, Lock, Eye, EyeOff, LogIn, ShoppingBag, Loader2 } from "lucide-react";
 import { useCustomer } from "@/contexts/CustomerContext";
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: { client_id: string; callback: (res: { credential: string }) => void }) => void;
+          renderButton: (el: HTMLElement, options: object) => void;
+        };
+      };
+    };
+  }
+}
 
 export default function CustomerLogin() {
   const [, navigate] = useLocation();
@@ -12,6 +25,45 @@ export default function CustomerLogin() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+
+  const googleLogin = trpc.customerAuth.googleLogin.useMutation({
+    onSuccess: () => {
+      toast.success("Connexion Google réussie !");
+      refetch();
+      navigate("/compte");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) return;
+
+    const initGoogle = () => {
+      if (!window.google || !googleBtnRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (res) => googleLogin.mutate({ credential: res.credential }),
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: "outline",
+        size: "large",
+        locale: "fr",
+        width: googleBtnRef.current.offsetWidth || 320,
+      });
+    };
+
+    if (window.google) {
+      initGoogle();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.onload = initGoogle;
+      document.head.appendChild(script);
+    }
+  }, []);
 
   const login = trpc.customerAuth.login.useMutation({
     onSuccess: () => {
@@ -123,6 +175,26 @@ export default function CustomerLogin() {
                 )}
               </button>
             </form>
+
+            {/* Google Sign-In */}
+            {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+              <>
+                <div className="flex items-center gap-3 my-5">
+                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+                  <span className="text-xs text-white/30 shrink-0">ou continuer avec</span>
+                  <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+                </div>
+                <div className="flex justify-center">
+                  {googleLogin.isPending ? (
+                    <div className="flex items-center gap-2 text-white/50 text-sm py-3">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Connexion Google...
+                    </div>
+                  ) : (
+                    <div ref={googleBtnRef} className="w-full" />
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Register link */}
             <div className="mt-6 text-center">

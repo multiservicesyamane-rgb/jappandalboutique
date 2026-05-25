@@ -749,6 +749,42 @@ export const appRouter = router({
       return { success: true };
     }),
 
+    googleLogin: publicProcedure
+      .input(z.object({ credential: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        // Vérifier le token Google
+        const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(input.credential)}`);
+        if (!res.ok) throw new TRPCError({ code: "UNAUTHORIZED", message: "Token Google invalide" });
+        const payload = await res.json() as { email?: string; name?: string; sub?: string; aud?: string; error?: string };
+
+        if (payload.error || !payload.email) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Impossible de vérifier le compte Google" });
+        }
+
+        // Vérifier que le client_id correspond (si configuré)
+        const clientId = process.env.GOOGLE_CLIENT_ID;
+        if (clientId && payload.aud !== clientId) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Token non autorisé" });
+        }
+
+        // Trouver ou créer le client
+        let customer = await db.getCustomerByEmail(payload.email);
+        if (!customer) {
+          await db.createCustomer({
+            name: payload.name || payload.email.split("@")[0],
+            phone: `g_${payload.sub}`,
+            email: payload.email,
+          });
+          customer = await db.getCustomerByEmail(payload.email);
+        }
+
+        if (!customer) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erreur création compte" });
+
+        const token = await createCustomerToken(customer.id, customer.phone, customer.name);
+        (ctx.res as any).setHeader("Set-Cookie", getCustomerCookieHeader(token));
+        return { id: customer.id, name: customer.name, phone: customer.phone, email: customer.email };
+      }),
+
     me: publicProcedure.query(async ({ ctx }) => {
       return await authenticateCustomer(ctx.req as any);
     }),
