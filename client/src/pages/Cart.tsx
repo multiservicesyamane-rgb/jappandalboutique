@@ -6,7 +6,6 @@ import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { deliveryZones } from "@/lib/deliveryZones";
 import { trpc } from "@/lib/trpc";
-import { generateReceipt } from "@/lib/generateReceipt";
 import {
   Minus, Plus, Trash2, ShoppingBag, ArrowLeft,
   MessageCircle, User, Phone, MapPin, ChevronDown, Loader2,
@@ -40,6 +39,9 @@ export default function Cart() {
       .map((i) => `• ${i.name} ×${i.quantity} = ${(parseFloat(i.price) * i.quantity).toLocaleString("fr-FR")} FCFA`)
       .join("\n");
 
+    const cleanPhone = phone.trim().replace(/[^0-9]/g, "");
+    const fullPhone = cleanPhone.startsWith("221") ? cleanPhone : `221${cleanPhone}`;
+
     let savedOrderId: number | undefined;
     try {
       const result = await createFromCart.mutateAsync({
@@ -50,30 +52,13 @@ export default function Cart() {
           quantity: i.quantity,
         })),
         customerName: name.trim(),
-        customerPhone: phone.trim().replace(/[^0-9]/g, ""),
+        customerPhone: fullPhone,
         deliveryLocation: selectedZone?.name,
       });
       if (result?.firstOrderId) savedOrderId = result.firstOrderId;
     } catch {
       // La commande continue même si la sauvegarde échoue
     }
-
-    // Générer le reçu automatiquement
-    generateReceipt({
-      orderId: savedOrderId,
-      shopName: settings.shopName,
-      shopPhone: settings.phone1?.replace(/[^0-9]/g, ""),
-      customerName: name.trim(),
-      customerPhone: phone.trim().replace(/[^0-9]/g, ""),
-      deliveryLocation: selectedZone?.name,
-      items: items.map((i) => ({
-        name: i.name,
-        quantity: i.quantity,
-        unitPrice: parseFloat(i.price),
-        total: parseFloat(i.price) * i.quantity,
-      })),
-      deliveryFee,
-    });
 
     const trackingUrl = `${window.location.origin}/suivi-commande`;
     const msg = [
