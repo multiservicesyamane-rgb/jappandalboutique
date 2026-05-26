@@ -6,9 +6,11 @@ import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { deliveryZones } from "@/lib/deliveryZones";
 import { trpc } from "@/lib/trpc";
+import { generateReceipt } from "@/lib/generateReceipt";
 import {
   Minus, Plus, Trash2, ShoppingBag, ArrowLeft,
   MessageCircle, User, Phone, MapPin, ChevronDown, Loader2,
+  CheckCircle, FileText,
 } from "lucide-react";
 
 export default function Cart() {
@@ -19,6 +21,7 @@ export default function Cart() {
   const [phone, setPhone] = useState("");
   const [zoneId, setZoneId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastReceipt, setLastReceipt] = useState<null | Parameters<typeof generateReceipt>[0]>(null);
 
   const selectedZone = deliveryZones.find((z) => z.id === zoneId);
   const deliveryFee = selectedZone?.price ?? 0;
@@ -82,9 +85,67 @@ export default function Cart() {
     const rawPhone = settings.phone1.replace(/[^0-9]/g, "");
     const phoneNum = rawPhone.startsWith("221") ? rawPhone : `221${rawPhone}`;
     window.open(`https://wa.me/${phoneNum}?text=${encodeURIComponent(msg)}`, "_blank");
+
+    const receiptData = {
+      orderId: savedOrderId,
+      shopName: settings.shopName,
+      shopPhone: settings.phone1?.replace(/[^0-9]/g, ""),
+      customerName: name.trim(),
+      customerPhone: fullPhone,
+      deliveryLocation: selectedZone?.name,
+      items: items.map((i) => ({
+        name: i.name,
+        quantity: i.quantity,
+        unitPrice: parseFloat(i.price),
+        total: parseFloat(i.price) * i.quantity,
+      })),
+      deliveryFee,
+      date: new Date().toISOString(),
+    };
+    localStorage.setItem("jappandal_last_receipt", JSON.stringify(receiptData));
+    setLastReceipt(receiptData);
     clearCart();
     setIsSubmitting(false);
   };
+
+  if (lastReceipt) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header />
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-md text-center">
+            <div className="bg-white rounded-3xl border shadow-sm p-8">
+              <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="h-10 w-10 text-green-500" />
+              </div>
+              <h1 className="text-2xl font-black text-gray-800 mb-2">Commande envoyée !</h1>
+              <p className="text-sm text-gray-500 mb-6">
+                Votre commande a été transmise via WhatsApp. Nous vous contacterons pour confirmer la livraison.
+              </p>
+              <button
+                onClick={() => generateReceipt(lastReceipt)}
+                className="w-full flex items-center justify-center gap-2 bg-[#1E5A8E] text-white font-bold py-4 rounded-xl text-base mb-3 active:scale-95 transition-transform"
+              >
+                <FileText className="h-5 w-5" />
+                Télécharger mon reçu / Facture
+              </button>
+              <Link href="/suivi-commande">
+                <button className="w-full flex items-center justify-center gap-2 border border-[#1E5A8E] text-[#1E5A8E] font-bold py-3.5 rounded-xl text-sm mb-3 active:scale-95 transition-transform">
+                  Suivre ma commande
+                </button>
+              </Link>
+              <Link href="/produits">
+                <button className="w-full text-sm text-gray-400 py-2 hover:text-gray-600">
+                  Continuer mes achats →
+                </button>
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

@@ -2,18 +2,32 @@ import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import {
   Menu, X, Search, ShoppingCart, LayoutDashboard,
-  Home, Package, Grid3X3, Phone, Zap, User, UserCheck,
+  Home, Package, Grid3X3, Phone, Zap, User, UserCheck, FileText,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useCustomer } from "@/contexts/CustomerContext";
+import { generateReceipt } from "@/lib/generateReceipt";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pendingReceipt, setPendingReceipt] = useState<any>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("jappandal_last_receipt");
+    if (stored) {
+      try { setPendingReceipt(JSON.parse(stored)); } catch {}
+    }
+  }, []);
+
+  const dismissReceipt = () => {
+    localStorage.removeItem("jappandal_last_receipt");
+    setPendingReceipt(null);
+  };
   const { user } = useAuth();
   const { customer } = useCustomer();
   const { totalItems } = useCart();
@@ -44,6 +58,27 @@ export function Header() {
             {settings.phone1}
           </a>
         </div>
+        {/* Bandeau reçu en attente */}
+        {pendingReceipt && (
+          <div className="bg-[#A8D24E] text-white px-4 py-2 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <FileText className="h-4 w-4 shrink-0" />
+              <span>Votre reçu de commande est disponible</span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => { generateReceipt(pendingReceipt); dismissReceipt(); }}
+                className="bg-white text-[#5a8a1e] font-bold text-xs px-3 py-1.5 rounded-full active:scale-95 transition-transform"
+              >
+                Télécharger
+              </button>
+              <button onClick={dismissReceipt} className="text-white/70 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Top bar — gradient animé */}
         <div className="header-gradient text-white relative overflow-hidden">
           {/* Orbe de lumière décoratif */}
