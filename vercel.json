@@ -1,17 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "jappandal": {
-      "root": ".",
-      "framework": "vite",
-      "installCommand": "npm install --legacy-peer-deps",
-      "buildCommand": "node scripts/build-vercel.mjs"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": { "service": "jappandal" }
-    }
-  ]
+  "version": 2,
+  "buildCommand": "node scripts/build-vercel.mjs",
+  "installCommand": "npm install --legacy-peer-deps"
 }
