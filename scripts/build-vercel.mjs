@@ -83,7 +83,9 @@ writeFileSync(
         { status: 404, src: "^(?!/api).*$", dest: "/404.html" },
       ],
       framework: { version: "6.4.2" },
-      crons: [{ path: "/api/cron/social", schedule: "*/5 * * * *" }],
+      // Le plan Hobby de Vercel limite les crons à une exécution par jour.
+      // Sur un plan Pro, définir CRON_SCHEDULE=*/5 * * * * dans les variables d'environnement.
+      crons: [{ path: "/api/cron/social", schedule: process.env.CRON_SCHEDULE || "0 0 * * *" }],
     },
     null,
     2

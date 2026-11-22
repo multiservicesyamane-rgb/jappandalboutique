@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const require = createRequire(import.meta.url);
-const base = "../.vercel/output/services/jappandal/functions/api";
+// Build Output API v3 classique : .vercel/output/functions/api
+const base = "../.vercel/output/functions/api";
 
 for (const name of ["trpc/[trpc].func/index.js", "cron/social.func/index.js"]) {
   try {
