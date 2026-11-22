@@ -3,8 +3,7 @@
   "services": {
     "jappandal": {
       "root": ".",
-      "runtime": "node",
-      "entrypoint": "server/vercel-handler.ts",
+      "framework": "vite",
       "installCommand": "npm install --legacy-peer-deps",
       "buildCommand": "node scripts/build-vercel.mjs"
     }
