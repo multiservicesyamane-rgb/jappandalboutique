@@ -143,7 +143,7 @@ writeFileSync(
   JSON.stringify(
     {
       version: 3,
-      services: [{ name: SERVICE, root: ".", runtime: "nodejs24.x" }],
+      services: [{ name: SERVICE, root: "." }],
       crons: [{ path: "/api/cron/social", schedule: "*/5 * * * *" }],
     },
     null,

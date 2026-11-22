@@ -3,7 +3,7 @@
   "services": {
     "jappandal": {
       "root": ".",
-      "runtime": "nodejs24.x",
+      "runtime": "node",
       "installCommand": "npm install --legacy-peer-deps",
       "buildCommand": "node scripts/build-vercel.mjs"
     }
