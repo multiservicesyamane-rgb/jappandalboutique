@@ -4,6 +4,7 @@
     "jappandal": {
       "root": ".",
       "runtime": "node",
+      "entrypoint": "server/vercel-handler.ts",
       "installCommand": "npm install --legacy-peer-deps",
       "buildCommand": "node scripts/build-vercel.mjs"
     }
