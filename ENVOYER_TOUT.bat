@@ -3,7 +3,7 @@ echo ==========================================
 echo ENVOI DE TOUTES LES MISES A JOUR VERS VERCEL
 echo ==========================================
 git add .
-git commit -m "style: Suppression des bandes de defilement pour simplifier l'accueil"
+git commit -m "feat: suppression des autres sections et validation du numéro de téléphone"
 git push
 echo ==========================================
 echo TERMINE ! Vercel est en train de se mettre a jour.

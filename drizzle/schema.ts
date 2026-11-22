@@ -67,6 +67,45 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 
 /**
+ * Campagnes de publication planifiée (plusieurs produits étalés dans le temps)
+ */
+export const socialCampaigns = pgTable("social_campaigns", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  platforms: text("platforms").notNull(),
+  intervalMinutes: integer("intervalMinutes").notNull().default(60),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SocialCampaign = typeof socialCampaigns.$inferSelect;
+export type InsertSocialCampaign = typeof socialCampaigns.$inferInsert;
+
+/**
+ * File d'attente des publications automatiques sur les réseaux sociaux
+ */
+export const socialPosts = pgTable("social_posts", {
+  id: serial("id").primaryKey(),
+  productId: integer("productId"),
+  productName: varchar("productName", { length: 200 }),
+  platform: varchar("platform", { length: 30 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  message: text("message"),
+  imageUrl: text("imageUrl"),
+  link: text("link"),
+  externalId: varchar("externalId", { length: 200 }),
+  error: text("error"),
+  attempts: integer("attempts").default(0).notNull(),
+  campaignId: integer("campaignId"),
+  scheduledAt: timestamp("scheduledAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  publishedAt: timestamp("publishedAt"),
+});
+
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type InsertSocialPost = typeof socialPosts.$inferInsert;
+
+/**
  * Orders tracking table for WhatsApp orders
  */
 export const orders = pgTable("orders", {

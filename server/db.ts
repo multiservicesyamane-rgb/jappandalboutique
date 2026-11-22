@@ -1,7 +1,7 @@
 import { eq, desc, and, like, sql, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { InsertUser, users, categories, products, orders, customers, settings, banners, affiliateLinks, adBanners, productDrafts, productMedia, productSpecs, InsertCategory, InsertProduct, InsertOrder, InsertCustomer, InsertSetting, InsertBanner, InsertAffiliateLink, InsertAdBanner, InsertProductDraft, InsertProductMedia, InsertProductSpec } from "../drizzle/schema";
+import { InsertUser, users, categories, products, orders, customers, settings, banners, affiliateLinks, adBanners, productDrafts, productMedia, productSpecs, socialPosts, socialCampaigns, InsertCategory, InsertProduct, InsertOrder, InsertCustomer, InsertSetting, InsertBanner, InsertAffiliateLink, InsertAdBanner, InsertProductDraft, InsertProductMedia, InsertProductSpec, InsertSocialPost, InsertSocialCampaign } from "../drizzle/schema";
 import { resolveImageUrl } from "./storage";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -196,6 +196,93 @@ export async function createProduct(product: InsertProduct) {
   if (!db) throw new Error("Database not available");
   const result = await db.insert(products).values(product);
   return result;
+}
+
+/** Crée un produit et renvoie son ID (utile pour la publication automatique) */
+export async function createProductReturningId(product: InsertProduct): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(products).values(product).returning({ id: products.id });
+  return result[0]?.id;
+}
+
+// Social publishing queue
+export async function createSocialPost(data: InsertSocialPost): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(socialPosts).values(data).returning({ id: socialPosts.id });
+  return result[0]?.id;
+}
+
+export async function getSocialPosts(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(socialPosts).orderBy(desc(socialPosts.createdAt)).limit(limit);
+}
+
+export async function getSocialPostById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(socialPosts).where(eq(socialPosts.id, id)).limit(1);
+  return result[0];
+}
+
+export async function updateSocialPost(id: number, data: Partial<InsertSocialPost>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(socialPosts).set(data).where(eq(socialPosts.id, id));
+}
+
+// Campagnes planifiées
+export async function createSocialCampaign(data: InsertSocialCampaign): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(socialCampaigns).values(data).returning({ id: socialCampaigns.id });
+  return result[0]?.id;
+}
+
+export async function getSocialCampaigns() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(socialCampaigns).orderBy(desc(socialCampaigns.createdAt));
+}
+
+export async function getSocialCampaignById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(socialCampaigns).where(eq(socialCampaigns.id, id)).limit(1);
+  return result[0];
+}
+
+export async function updateSocialCampaign(id: number, data: Partial<InsertSocialCampaign>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(socialCampaigns).set(data).where(eq(socialCampaigns.id, id));
+}
+
+export async function getDueSocialPosts(limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(socialPosts)
+    .where(and(eq(socialPosts.status, "scheduled"), sql`${socialPosts.scheduledAt} <= NOW()`))
+    .orderBy(socialPosts.scheduledAt)
+    .limit(limit);
+}
+
+export async function getCampaignPosts(campaignId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(socialPosts)
+    .where(eq(socialPosts.campaignId, campaignId))
+    .orderBy(socialPosts.scheduledAt);
+}
+
+export async function cancelScheduledPosts(campaignId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(socialPosts)
+    .set({ status: "cancelled", error: "Campagne annulée" })
+    .where(and(eq(socialPosts.campaignId, campaignId), eq(socialPosts.status, "scheduled")));
 }
 
 export async function updateProduct(id: number, product: Partial<InsertProduct>) {

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import {
@@ -15,6 +17,7 @@ import {
   AlertTriangle,
   RefreshCw,
   CheckCircle,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +38,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
+  const [lowStockSearch, setLowStockSearch] = useState("");
   const utils = trpc.useUtils();
   const { data: products } = trpc.products.list.useQuery();
   const { data: categories } = trpc.categories.list.useQuery();
@@ -46,6 +50,9 @@ export default function AdminDashboard() {
   const inStockCount = products?.filter((p) => p.inStock > 0).length || 0;
   const outOfStockCount = products?.filter((p) => p.inStock === 0).length || 0;
   const lowStockProducts = products?.filter((p) => p.inStock > 0 && p.inStock <= 5) || [];
+  const filteredLowStock = lowStockProducts.filter((p) =>
+    !lowStockSearch || p.name.toLowerCase().includes(lowStockSearch.toLowerCase())
+  );
   const totalRevenue = dashStats?.totalRevenue ? parseFloat(dashStats.totalRevenue) : 0;
 
   const handleRefresh = () => {
@@ -144,26 +151,52 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Low stock alert */}
+      {/* Low stock alert — une seule ligne + recherche */}
       {lowStockProducts.length > 0 && (
         <Card className="bg-amber-50 border-amber-200 mb-6">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
               <h3 className="text-sm font-bold text-amber-800">
                 Stock faible — {lowStockProducts.length} produit{lowStockProducts.length > 1 ? "s" : ""} à réapprovisionner
               </h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {lowStockProducts.map((p) => (
-                <span key={p.id} className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded-full border border-amber-200">
-                  {p.name}
-                  <span className="bg-amber-600 text-white rounded-full px-1.5 py-0.5 text-[10px] font-bold ml-1">
-                    {p.inStock}
-                  </span>
+              <div className="relative w-full sm:w-52 ml-auto">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-amber-500" />
+                <Input
+                  value={lowStockSearch}
+                  onChange={(e) => setLowStockSearch(e.target.value)}
+                  placeholder="Rechercher un produit…"
+                  className="h-8 pl-8 text-xs bg-white/90 border-amber-200"
+                />
+              </div>
+              <Link href="/admin/produits?stock=low_stock">
+                <span className="text-xs text-amber-700 font-semibold hover:underline cursor-pointer whitespace-nowrap">
+                  Voir tout →
                 </span>
-              ))}
+              </Link>
             </div>
+
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              {filteredLowStock.length > 0 ? (
+                filteredLowStock.map((p) => (
+                  <span key={p.id} title={p.name} className="inline-flex items-center gap-1 shrink-0 max-w-[220px] bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded-full border border-amber-200">
+                    <span className="truncate">{p.name}</span>
+                    <span className="bg-amber-600 text-white rounded-full px-1.5 py-0.5 text-[10px] font-bold shrink-0">
+                      {p.inStock}
+                    </span>
+                  </span>
+                ))
+              ) : (
+                <p className="text-xs text-amber-700">
+                  Aucun produit ne correspond à « {lowStockSearch} »
+                </p>
+              )}
+            </div>
+            {lowStockSearch && filteredLowStock.length > 0 && (
+              <p className="text-[11px] text-amber-600 mt-1">
+                {filteredLowStock.length} résultat{filteredLowStock.length !== 1 ? "s" : ""} sur {lowStockProducts.length}
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

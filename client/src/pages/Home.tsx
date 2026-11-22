@@ -2,11 +2,11 @@ import { useRef } from "react";
 import { Link } from "wouter";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { AdBanner } from "@/components/AdBanner";
 import { ProductCard } from "@/components/ProductCard";
 import { AutoScrollCarousel } from "@/components/AutoScrollCarousel";
 import { trpc } from "@/lib/trpc";
-import { Zap, ShoppingBag, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { sortProductsWithImageFirst } from "@/lib/utils";
 import { useSettings } from "@/contexts/SettingsContext";
 
 export default function Home() {
@@ -15,82 +15,39 @@ export default function Home() {
   const { data: products, isLoading: productsLoading } = trpc.products.list.useQuery();
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
+  // Les produits avec image passent en premier partout
+  const sortedProducts = sortProductsWithImageFirst(products || []);
+  const productsWithImage = sortedProducts.filter(p => !!p.imageUrl?.trim());
+
   // Tabaski special section
-  const tabaskiProducts = products?.filter(p => p.badge?.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("mouton") || p.name.toLowerCase().includes("pack") || p.name.toLowerCase().includes("grillade")) || [];
+  const tabaskiProducts = productsWithImage.filter(p => p.badge?.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("tabaski") || p.name.toLowerCase().includes("mouton") || p.name.toLowerCase().includes("pack") || p.name.toLowerCase().includes("grillade"));
 
   // Produits en vedette
-  const featuredProducts = products?.slice(0, 8) || [];
+  const featuredProducts = productsWithImage.slice(0, 8);
 
-  // Par catégorie
-  const productsByCategory = categories?.map(cat => ({
-    category: cat,
-    items: products?.filter(p => p.categoryId === cat.id) || [],
-  })).filter(g => g.items.length > 0) || [];
+  // TOUTES les catégories : celles qui ont des produits illustrés en haut,
+  // les autres (sans image) repoussées en bas de page.
+  const productsByCategory = (categories || [])
+    .map(cat => {
+      const items = sortedProducts.filter(p => p.categoryId === cat.id);
+      return {
+        category: cat,
+        items,
+        imageCount: items.filter(p => !!p.imageUrl?.trim()).length,
+      };
+    })
+    .sort((a, b) => b.imageCount - a.imageCount);
+
+  const visibleGroups = productsByCategory.filter(g => g.items.length > 0);
+
+  // Produits sans catégorie : affichés tout en bas pour ne rien masquer
+  const knownCategoryIds = new Set((categories || []).map(c => c.id));
+  const uncategorizedProducts = sortedProducts.filter(p => !knownCategoryIds.has(p.categoryId));
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      {/* ─── HERO BANNER ─── */}
-      <section className="header-gradient text-white relative overflow-hidden">
-        {/* Orbes neon de fond */}
-        <div className="absolute -top-10 right-10 w-56 h-56 glow-orb bg-[#A8D24E] opacity-20 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-40 h-40 glow-orb bg-[#1E5A8E] opacity-25 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 glow-orb bg-[#25D366] opacity-15 pointer-events-none" />
-
-        <div className="container py-2 sm:py-3 relative z-10">
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] sm:text-[10px] font-black"
-                  style={{ background: "rgba(168,210,78,0.18)", border: "1px solid rgba(168,210,78,0.6)", color: "#A8D24E", boxShadow: "0 0 10px rgba(168,210,78,0.25)" }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#A8D24E] animate-pulse flex-shrink-0" />
-                  🛍️ BOUTIQUE OUVERTE
-                </span>
-                <span className="badge-flash text-white text-[9px] font-black px-2 py-0.5 rounded-full inline-flex items-center gap-0.5">
-                  <Zap className="h-2.5 w-2.5" /> LIVE
-                </span>
-                <span className="text-[#A8D24E] text-[9px] sm:text-[10px] font-bold opacity-90">Livraison 24h · Dakar</span>
-              </div>
-              <h1 className="text-sm sm:text-base md:text-2xl lg:text-3xl font-extrabold leading-snug section-title-neon">
-                {settings.shopName}{" "}
-                <span className="text-neon-green">— Dakar</span>
-              </h1>
-              <p className="text-[10px] sm:text-xs md:text-sm opacity-75 mt-0.5 line-clamp-1">
-                {settings.shopSlogan || "Produits frais, packs festifs & livraison express"}
-              </p>
-              <div className="flex gap-2 mt-2.5">
-                <Link href="/produits">
-                  <span className="inline-flex items-center gap-1.5 bg-[#A8D24E] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg active:scale-95 cursor-pointer neon-green">
-                    <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    Voir le catalogue
-                  </span>
-                </Link>
-                <a
-                  href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 bg-[#25D366] text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg active:scale-95 whatsapp-neon"
-                >
-                  <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                  WhatsApp
-                </a>
-              </div>
-            </div>
-            <div className="flex-shrink-0 relative">
-              <div className="absolute inset-0 rounded-full animate-pulse-glow" />
-              <img
-                src={settings.logoUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80"}
-                alt={settings.shopName}
-                className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-full border-2 border-[#A8D24E]/50 object-cover shadow-xl"
-                style={{ boxShadow: "0 0 20px rgba(168,210,78,0.4), 0 0 40px rgba(30,90,142,0.2)" }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ─── CATEGORIES: small round circles, auto-scroll ─── */}
       <section className="relative bg-gradient-to-b from-[#0a1628] to-[#0d1f3a] border-b border-[#1E5A8E]/30">
@@ -132,8 +89,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── BANNIÈRE PUB HAUT ─── */}
-      <AdBanner position="homepage_top" className="container mt-2 mb-0" />
+
 
       {/* ─── VENTES FLASH TABASKI ─── */}
       {tabaskiProducts.length > 0 && (
@@ -215,22 +171,57 @@ export default function Home() {
         </section>
       )}
 
-      {/* ─── CAROUSELS PAR CATÉGORIE (max 4) ─── */}
-      {!productsLoading && productsByCategory.slice(0, 4).map((group, idx) => (
-        <section key={group.category.id} className="py-6 sm:py-8 relative overflow-hidden border-b border-gray-100 last:border-b-0" style={{ background: idx % 2 === 0 ? "linear-gradient(160deg, #ffffff 0%, #f4f8ff 50%, #f0f7f0 100%)" : "linear-gradient(160deg, #f8fdf4 0%, #eef7ee 50%, #f4f8ff 100%)" }}>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: idx % 2 === 0 ? "radial-gradient(ellipse at top right, rgba(30,90,142,0.04), transparent 60%)" : "radial-gradient(ellipse at bottom left, rgba(168,210,78,0.05), transparent 60%)" }} />
+      {/* ─── CAROUSELS DE TOUTES LES CATÉGORIES ─── */}
+      {!productsLoading && visibleGroups.map((group, idx) => {
+        const isOtherCategory = group.imageCount === 0;
+        const showOtherTitle = isOtherCategory && visibleGroups[idx - 1]?.imageCount !== 0;
+        return (
+          <div key={group.category.id}>
+            {showOtherTitle && (
+              <div className="bg-gray-100 border-b border-gray-200">
+                <div className="container py-2">
+                  <h2 className="text-xs sm:text-sm font-black uppercase tracking-wide text-gray-500">
+                    Autres catégories
+                  </h2>
+                </div>
+              </div>
+            )}
+            <section className="py-6 sm:py-8 relative overflow-hidden border-b border-gray-100 last:border-b-0" style={{ background: idx % 2 === 0 ? "linear-gradient(160deg, #ffffff 0%, #f4f8ff 50%, #f0f7f0 100%)" : "linear-gradient(160deg, #f8fdf4 0%, #eef7ee 50%, #f4f8ff 100%)" }}>
+              <div className="absolute inset-0 pointer-events-none" style={{ background: idx % 2 === 0 ? "radial-gradient(ellipse at top right, rgba(30,90,142,0.04), transparent 60%)" : "radial-gradient(ellipse at bottom left, rgba(168,210,78,0.05), transparent 60%)" }} />
+              <div className="container px-0 sm:px-4 relative z-10">
+                <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
+                  <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
+                    <span className="text-xl">{group.category.emoji}</span>
+                    {group.category.name}
+                  </h2>
+                  <Link href={`/categories/${group.category.slug}`}>
+                    <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">Voir tout &gt;</span>
+                  </Link>
+                </div>
+                <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x snap-mandatory">
+                  {group.items.map((product) => (
+                    <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
+                      <ProductCard id={product.id} name={product.name} price={product.price} unit={product.unit} imageUrl={product.imageUrl} badge={product.badge} inStock={product.inStock} compact />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+        );
+      })}
+
+      {/* ─── PRODUITS SANS CATÉGORIE (tout en bas) ─── */}
+      {!productsLoading && uncategorizedProducts.length > 0 && (
+        <section className="py-6 sm:py-8 relative overflow-hidden border-b border-gray-100" style={{ background: "linear-gradient(160deg, #ffffff 0%, #f4f8ff 50%, #f0f7f0 100%)" }}>
           <div className="container px-0 sm:px-4 relative z-10">
-            <div className="flex items-center justify-between mb-4 px-4 sm:px-0">
-              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800 flex items-center gap-2">
-                <span className="text-xl">{group.category.emoji}</span>
-                {group.category.name}
+            <div className="mb-4 px-4 sm:px-0">
+              <h2 className="text-sm sm:text-base md:text-xl font-black text-gray-800">
+                Autres produits
               </h2>
-              <Link href={`/categories/${group.category.slug}`}>
-                <span className="text-[#1E5A8E] text-[10px] sm:text-xs font-bold hover:underline cursor-pointer bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">Voir tout &gt;</span>
-              </Link>
             </div>
             <div className="flex overflow-x-auto gap-3 sm:gap-4 px-4 sm:px-0 pb-4 scrollbar-hide snap-x snap-mandatory">
-              {group.items.slice(0, 8).map((product) => (
+              {uncategorizedProducts.map((product) => (
                 <div key={product.id} className="w-[140px] sm:w-[180px] md:w-[220px] flex-shrink-0 snap-start">
                   <ProductCard id={product.id} name={product.name} price={product.price} unit={product.unit} imageUrl={product.imageUrl} badge={product.badge} inStock={product.inStock} compact />
                 </div>
@@ -238,42 +229,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-      ))}
-
-      {/* ─── BANNIÈRE PUB MILIEU ─── */}
-      <AdBanner position="homepage_middle" className="container py-2" />
-
-
-      {/* ─── BANNIÈRE PUB BAS ─── */}
-      <AdBanner position="homepage_bottom" className="container py-2" />
-
-      {/* ─── CTA WhatsApp ─── */}
-      <section className="py-6 sm:py-8 md:py-12 text-white relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0a1e36 0%, #122a0d 35%, #0d1a0a 60%, #0a1e36 100%)" }}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(168,210,78,0.12),transparent_45%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(30,90,142,0.15),transparent_45%)] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(168,210,78,0.05) 0%, transparent 70%)" }} />
-        <div className="container text-center relative z-10">
-          <h2 className="text-sm sm:text-base md:text-2xl font-extrabold mb-1.5 sm:mb-2">Besoin d'aide ?</h2>
-          <p className="text-[10px] sm:text-xs md:text-sm opacity-80 mb-3 sm:mb-4 max-w-md mx-auto">
-            Équipe disponible 7j/7 pour vos commandes personnalisées.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-2">
-            <Link href="/panier">
-              <span className="inline-flex items-center justify-center gap-1.5 bg-[#A8D24E] text-white text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full shadow active:scale-95 cursor-pointer w-full sm:w-auto">
-                <ShoppingBag className="h-3.5 w-3.5" /> Mon panier
-              </span>
-            </Link>
-            <a
-              href={`https://wa.me/${settings.phone1.replace(/[^0-9]/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 bg-[#25D366] text-white text-[11px] sm:text-xs font-bold px-4 py-2 rounded-full shadow active:scale-95 w-full sm:w-auto"
-            >
-              <svg className="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg> WhatsApp
-            </a>
-          </div>
-        </div>
-      </section>
+      )}
 
       <Footer />
 

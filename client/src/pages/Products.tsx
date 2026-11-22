@@ -8,6 +8,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { sortProductsWithImageFirst } from "@/lib/utils";
 import { Search, SlidersHorizontal, ArrowUpDown, X, ChevronDown, MessageCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -48,7 +49,8 @@ export default function Products() {
         break;
     }
 
-    return result;
+    // Les produits avec image restent en haut, le tri choisi s'applique dans chaque groupe
+    return sortProductsWithImageFirst(result);
   }, [allProducts, selectedCategory, searchQuery, sortBy]);
 
   return (

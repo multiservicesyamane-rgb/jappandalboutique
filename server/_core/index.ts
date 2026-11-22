@@ -5,6 +5,7 @@ import net from "net";
 import path from "node:path";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../routers";
+import { processDuePosts } from "../socialPublisher";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -37,6 +38,20 @@ async function startServer() {
   // Serve local uploaded images
   app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
+  // Cron : publication planifiée (appelable par Vercel Cron / tâche externe)
+  app.post("/api/cron/social", async (req, res) => {
+    const secret = process.env.CRON_SECRET;
+    if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    try {
+      res.json(await processDuePosts());
+    } catch (error) {
+      res.status(500).json({ error: error instanceof Error ? error.message : "Erreur" });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
@@ -64,6 +79,14 @@ async function startServer() {
     console.log(`\n🚀 Jappandal Boutique — http://localhost:${port}/`);
     console.log(`   Admin: http://localhost:${port}/admin\n`);
   });
+
+  // Publications planifiées : vérification toutes les minutes
+  setInterval(() => {
+    processDuePosts().catch((error) => console.error("[Social] erreur planificateur:", error));
+  }, 60_000);
+  setTimeout(() => {
+    processDuePosts().catch(() => {});
+  }, 15_000);
 }
 
 startServer().catch(console.error);

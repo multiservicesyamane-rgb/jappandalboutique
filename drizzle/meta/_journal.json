@@ -15,6 +15,27 @@
       "when": 1779705587583,
       "tag": "0001_fearless_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795315781829,
+      "tag": "0002_fat_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795345492891,
+      "tag": "0003_loose_puff_adder",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795347322378,
+      "tag": "0004_shiny_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

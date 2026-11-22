@@ -1,5 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearch } from "wouter";
 import { AdminLayout } from "@/components/AdminLayout";
+import { Pagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,8 +24,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { ImageCropper } from "@/components/ImageCropper";
+import { ProductImportDialog } from "@/components/ProductImportDialog";
+import { SocialPublisherDialog } from "@/components/SocialPublisherDialog";
+import { SocialScheduleDialog } from "@/components/SocialScheduleDialog";
 import {
   Plus,
+  Upload,
+  Share2,
+  CalendarClock,
   Pencil,
   Trash2,
   Package,
@@ -47,10 +55,19 @@ interface ImageSlot {
 
 export default function AdminProducts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [publishProductId, setPublishProductId] = useState<number | null>(null);
+  const [isPublishOpen, setIsPublishOpen] = useState(false);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const searchParams = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [stockFilter, setStockFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>(
+    new URLSearchParams(searchParams).get("stock") === "low_stock" ? "low_stock" : "all"
+  );
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -114,6 +131,10 @@ export default function AdminProducts() {
       return true;
     });
   }, [products, searchQuery, categoryFilter, stockFilter]);
+
+  useEffect(() => { setPage(1); }, [searchQuery, categoryFilter, stockFilter]);
+
+  const paginatedProducts = filteredProducts?.slice((page - 1) * pageSize, page * pageSize) || [];
 
   const activeCount = products?.filter((p) => p.inStock !== -1).length || 0;
   const inactiveCount = products?.filter((p) => p.inStock === -1).length || 0;
@@ -308,6 +329,30 @@ export default function AdminProducts() {
             Actualiser
           </Button>
           <Button
+            variant="outline"
+            onClick={() => setIsImportOpen(true)}
+            className="shrink-0 gap-1.5"
+          >
+            <Upload className="h-4 w-4" />
+            Importer
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => { setPublishProductId(null); setIsPublishOpen(true); }}
+            className="shrink-0 gap-1.5"
+          >
+            <Share2 className="h-4 w-4" />
+            Publier
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsScheduleOpen(true)}
+            className="shrink-0 gap-1.5"
+          >
+            <CalendarClock className="h-4 w-4" />
+            Planifier
+          </Button>
+          <Button
             onClick={() => openDialog()}
             className="bg-[#1E5A8E] hover:bg-[#0D3B0D] text-white shrink-0"
           >
@@ -353,7 +398,7 @@ export default function AdminProducts() {
         <>
           {/* Mobile: card view */}
           <div className="grid grid-cols-1 gap-3 md:hidden">
-            {filteredProducts.map((product) => {
+            {paginatedProducts.map((product) => {
               const category = categories?.find((c) => c.id === product.categoryId);
               return (
                 <div key={product.id} className={`bg-white rounded-lg border p-3 flex gap-3 ${product.inStock === -1 ? "opacity-60" : ""}`}>
@@ -395,6 +440,13 @@ export default function AdminProducts() {
                     >
                       {product.inStock === -1 ? <ToggleLeft className="h-5 w-5" /> : <ToggleRight className="h-5 w-5" />}
                     </button>
+                    <button
+                      onClick={() => { setPublishProductId(product.id); setIsPublishOpen(true); }}
+                      title="Publier sur les réseaux sociaux"
+                      className="p-2 rounded-lg hover:bg-blue-50"
+                    >
+                      <Share2 className="h-4 w-4 text-[#1E5A8E]" />
+                    </button>
                     <button onClick={() => openDialog(product)} className="p-2 rounded-lg hover:bg-gray-100">
                       <Pencil className="h-4 w-4 text-gray-500" />
                     </button>
@@ -424,7 +476,7 @@ export default function AdminProducts() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map((product) => {
+                  {paginatedProducts.map((product) => {
                     const category = categories?.find((c) => c.id === product.categoryId);
                     return (
                       <tr key={product.id} className={`border-b last:border-0 hover:bg-gray-50 ${product.inStock === -1 ? "opacity-60 bg-gray-50/50" : ""}`}>
@@ -491,6 +543,13 @@ export default function AdminProducts() {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => { setPublishProductId(product.id); setIsPublishOpen(true); }}
+                              title="Publier sur les réseaux sociaux"
+                              className="p-2 rounded-lg hover:bg-blue-50"
+                            >
+                              <Share2 className="h-4 w-4 text-[#1E5A8E]" />
+                            </button>
                             <button onClick={() => openDialog(product)} className="p-2 rounded-lg hover:bg-gray-100">
                               <Pencil className="h-4 w-4 text-gray-500" />
                             </button>
@@ -525,6 +584,16 @@ export default function AdminProducts() {
             </Button>
           )}
         </div>
+      )}
+
+      {filteredProducts && filteredProducts.length > 0 && (
+        <Pagination
+          total={filteredProducts.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        />
       )}
 
       {/* Product Dialog with 5 image slots + crop */}
@@ -726,6 +795,27 @@ export default function AdminProducts() {
         onCropComplete={handleCropComplete}
         aspectRatio={1}
         title={`Recadrer l'image ${cropSlotIndex + 1}`}
+      />
+
+      {/* Import multi-formats */}
+      <ProductImportDialog
+        open={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImported={() => utils.products.listAdmin.invalidate()}
+      />
+
+      <SocialPublisherDialog
+        key={publishProductId || "all"}
+        open={isPublishOpen}
+        onClose={() => setIsPublishOpen(false)}
+        products={products || []}
+        defaultProductId={publishProductId}
+      />
+
+      <SocialScheduleDialog
+        open={isScheduleOpen}
+        onClose={() => setIsScheduleOpen(false)}
+        products={products || []}
       />
     </AdminLayout>
   );

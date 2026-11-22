@@ -30,6 +30,7 @@ const AdminAdBanners = React.lazy(() => import("./pages/admin/AdBanners"));
 const AdminLogin = React.lazy(() => import("./pages/admin/Login"));
 const AdminMarketing = React.lazy(() => import("./pages/admin/Marketing"));
 const AdminAddProduct = React.lazy(() => import("./pages/admin/AddProduct"));
+const AdminSocial = React.lazy(() => import("./pages/admin/Social"));
 const CustomerLogin = React.lazy(() => import("./pages/account/Login"));
 const CustomerRegister = React.lazy(() => import("./pages/account/Register"));
 const CustomerAccount = React.lazy(() => import("./pages/account/Account"));
@@ -78,6 +79,8 @@ function Router() {
         <Route path="/admin/bannieres-pub" component={AdminAdBanners} />
         <Route path="/admin/apparence" component={AdminAppearance} />
         <Route path="/admin/marketing" component={AdminMarketing} />
+
+        <Route path="/admin/reseaux-sociaux" component={AdminSocial} />
 
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

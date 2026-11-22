@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { sortProductsWithImageFirst } from "@/lib/utils";
 import { ChevronRight, MessageCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -59,6 +60,8 @@ export default function CategoryDetail() {
     );
   }
 
+  const sortedProducts = sortProductsWithImageFirst(products || []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
@@ -110,9 +113,9 @@ export default function CategoryDetail() {
                 </div>
               ))}
             </div>
-          ) : products && products.length > 0 ? (
+          ) : sortedProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {products.map((product) => (
+              {sortedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}

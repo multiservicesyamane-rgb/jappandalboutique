@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
+import { Pagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,8 @@ export default function AdminCustomers() {
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -147,6 +150,10 @@ export default function AdminCustomers() {
       c.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  useEffect(() => { setPage(1); }, [searchQuery]);
+
+  const paginatedCustomers = filteredCustomers?.slice((page - 1) * pageSize, page * pageSize) || [];
+
   const totalSpentAll = customers?.reduce((sum, c) => {
     const spent = typeof c.totalSpent === "string" ? parseFloat(c.totalSpent) : (c.totalSpent || 0);
     return sum + spent;
@@ -197,7 +204,7 @@ export default function AdminCustomers() {
         <>
           {/* Mobile: card view */}
           <div className="grid grid-cols-1 gap-3 md:hidden">
-            {filteredCustomers.map((customer) => (
+            {paginatedCustomers.map((customer) => (
               <div key={customer.id} className="bg-white rounded-xl border p-3 shadow-sm">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -278,7 +285,7 @@ export default function AdminCustomers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCustomers.map((customer) => (
+                  {paginatedCustomers.map((customer) => (
                     <tr key={customer.id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
@@ -378,6 +385,16 @@ export default function AdminCustomers() {
             </Button>
           )}
         </div>
+      )}
+
+      {filteredCustomers && filteredCustomers.length > 0 && (
+        <Pagination
+          total={filteredCustomers.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        />
       )}
 
       {/* Customer Edit Dialog */}

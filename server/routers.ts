@@ -6,6 +6,17 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { storagePut } from "./storage";
+import { importProductsFromFile } from "./productImport";
+import {
+  ALL_PLATFORMS,
+  cancelCampaign,
+  createCampaignSchedule,
+  getSocialStatus,
+  processDuePosts,
+  publishNewProduct,
+  publishProduct,
+  retrySocialPost,
+} from "./socialPublisher";
 import { initiatePayTechPayment, checkPayTechPaymentStatus } from "./paytech";
 import { verifyAdminCredentials, createSessionToken } from "./_core/auth";
 import {
@@ -148,7 +159,12 @@ export const appRouter = router({
         inStock: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
-        await db.createProduct(input);
+        const productId = await db.createProductReturningId(input);
+        // Publication automatique sur les réseaux configurés (ne bloque pas la création)
+        if (productId) {
+          const created = await db.getProductById(productId);
+          if (created) await publishNewProduct(created);
+        }
         return { success: true };
       }),
     update: adminProcedure
@@ -192,6 +208,64 @@ export const appRouter = router({
         const { url } = await storagePut(fileKey, buffer, input.mimeType);
         return { url };
       }),
+    importProducts: adminProcedure
+      .input(z.object({
+        fileName: z.string(),
+        fileData: z.string(), // base64
+        mode: z.enum(["upsert", "create", "update"]).default("upsert"),
+      }))
+      .mutation(async ({ input }) => {
+        return await importProductsFromFile(input);
+      }),
+  }),
+
+  social: router({
+    status: adminProcedure.query(() => getSocialStatus()),
+    list: adminProcedure
+      .input(z.object({ limit: z.number().min(1).max(200).optional() }).optional())
+      .query(({ input }) => db.getSocialPosts(input?.limit ?? 50)),
+    platforms: adminProcedure.query(() => ALL_PLATFORMS),
+    campaigns: adminProcedure.query(async () => {
+      const campaigns = await db.getSocialCampaigns();
+      const allPosts = await db.getSocialPosts(200);
+      return campaigns.map((campaign) => {
+        const posts = allPosts.filter((post) => post.campaignId === campaign.id);
+        return {
+          ...campaign,
+          total: posts.length,
+          published: posts.filter((p) => p.status === "published").length,
+          failed: posts.filter((p) => p.status === "failed").length,
+          scheduled: posts.filter((p) => p.status === "scheduled").length,
+          nextAt: posts.find((p) => p.status === "scheduled")?.scheduledAt || null,
+        };
+      });
+    }),
+    createCampaign: adminProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        productIds: z.array(z.number()).min(1),
+        platforms: z.array(z.enum(["facebook", "instagram", "tiktok", "pinterest"])).min(1),
+        startAt: z.date(),
+        intervalMinutes: z.number().min(1).max(10080),
+      }))
+      .mutation(({ input }) => createCampaignSchedule(input)),
+    cancelCampaign: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => cancelCampaign(input.id)),
+    runDue: adminProcedure.mutation(() => processDuePosts()),
+    publish: adminProcedure
+      .input(z.object({
+        productId: z.number(),
+        platforms: z.array(z.enum(["facebook", "instagram", "tiktok", "pinterest"])).min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const product = await db.getProductById(input.productId);
+        if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Produit introuvable" });
+        return await publishProduct(product, input.platforms, false);
+      }),
+    retry: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => retrySocialPost(input.id)),
   }),
 
   orders: router({

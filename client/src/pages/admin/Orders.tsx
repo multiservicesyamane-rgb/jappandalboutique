@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
+import { Pagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,8 +35,6 @@ import {
   ArrowUpDown,
   Filter,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Printer,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -59,8 +58,6 @@ const statusLabels: Record<string, string> = {
   delivered: "Livré",
   cancelled: "Annulé",
 };
-
-const PAGE_SIZE = 20;
 
 function printOrderReceipt(order: any, shopName: string, shopPhone: string) {
   generateReceipt({
@@ -104,6 +101,7 @@ export default function AdminOrders() {
   const [newStatus, setNewStatus] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const utils = trpc.useUtils();
   const { data: allOrders, isLoading } = trpc.orders.list.useQuery();
@@ -174,9 +172,9 @@ export default function AdminOrders() {
     return result;
   }, [allOrders, statusFilter, dateFilter, searchQuery, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const orders = filteredAndSorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const orders = filteredAndSorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const totalRevenue = filteredAndSorted.reduce((sum, o) => sum + parseFloat(o.totalAmount || "0"), 0);
   const deliveredRevenue = filteredAndSorted
@@ -442,35 +440,13 @@ export default function AdminOrders() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <p className="text-xs text-gray-400">
-                {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredAndSorted.length)} sur {filteredAndSorted.length}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="h-8 gap-1"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                  Précédent
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="h-8 gap-1"
-                >
-                  Suivant
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            total={filteredAndSorted.length}
+            page={currentPage}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+          />
         </>
       ) : (
         <div className="text-center py-16 bg-white rounded-xl border">

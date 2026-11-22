@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
+import { Pagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,8 @@ import { Plus, Pencil, Trash2, FolderTree, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminCategories() {
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -51,6 +54,8 @@ export default function AdminCategories() {
     },
     onError: (error) => toast.error(`Erreur: ${error.message}`),
   });
+
+  const paginatedCategories = categories?.slice((page - 1) * pageSize, page * pageSize) || [];
 
   const generateSlug = (name: string) => {
     return name
@@ -121,7 +126,7 @@ export default function AdminCategories() {
         </div>
       ) : categories && categories.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {categories.map((category) => (
+          {paginatedCategories.map((category) => (
             <div
               key={category.id}
               className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow"
@@ -163,6 +168,10 @@ export default function AdminCategories() {
             Ajouter une catégorie
           </Button>
         </div>
+      )}
+
+      {categories && categories.length > 0 && (
+        <Pagination total={categories.length} page={page} pageSize={pageSize} onPageChange={setPage} />
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

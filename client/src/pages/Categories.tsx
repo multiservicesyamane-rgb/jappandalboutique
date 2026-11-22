@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { trpc } from "@/lib/trpc";
+import { sortProductsWithImageFirst } from "@/lib/utils";
 import { ChevronRight, MessageCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -14,7 +15,9 @@ export default function Categories() {
   const [selectedCatId, setSelectedCatId] = useState<number | null>(null);
 
   const activeCat = selectedCatId ? categories?.find((c) => c.id === selectedCatId) : categories?.[0];
-  const catProducts = products?.filter((p) => p.categoryId === (activeCat?.id || 0)) || [];
+  const catProducts = sortProductsWithImageFirst(
+    products?.filter((p) => p.categoryId === (activeCat?.id || 0)) || []
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
